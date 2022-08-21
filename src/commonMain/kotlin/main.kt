@@ -16,6 +16,7 @@ class MyScene : Scene() {
         val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
         val shooterView = solidRect(10, 10, Colors.BLACK) {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
+            anchor(0.5, 0.5)
         }
         val riderEvents = RiderEventsImpl(Key.W, Key.S, Key.A, Key.D)
         riderEvents.attach(this)
