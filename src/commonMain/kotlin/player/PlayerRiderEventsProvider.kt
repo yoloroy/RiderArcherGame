@@ -1,15 +1,17 @@
+package player
+
 import com.soywiz.korev.*
 import com.soywiz.korge.input.*
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
 import units.rider.*
 
-class PlayerRiderEvents(
+class PlayerRiderEventsProvider(
     private val upKey: Key,
     private val downKey: Key,
     private val leftKey: Key,
     private val rightKey: Key
-) : RiderEvents {
+) : RiderEventsProvider {
 
     private var up = false
     private var down = false
@@ -17,7 +19,7 @@ class PlayerRiderEvents(
     private var right = false
     private var shoot: IPoint? = null
 
-    override fun attach(view: View) {
+    fun attach(view: View) {
         with(view) {
             mouse {
                 down { shoot = it.currentPosStage }
@@ -36,7 +38,7 @@ class PlayerRiderEvents(
         }
     }
 
-    override fun events() = mutableListOf<RiderEvent>().apply {
+    override val events get() = mutableListOf<RiderEvent>().apply {
         if (up) add(RiderEvent.Move.Up)
         if (down) add(RiderEvent.Move.Down)
         if (left) add(RiderEvent.Move.Left)

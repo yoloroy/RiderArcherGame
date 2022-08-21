@@ -8,12 +8,12 @@ import core.*
 class RiderArcher(
     projectileCreator: Projectile.Creator,
     private val view: View,
-    private val events: RiderEvents,
+    eventsProvider: RiderEventsProvider,
     private val speedAdditionPerSecond: Double,
     private val stoppingSpeedPerSecond: Double,
     private val maxSpeedPerSecond: Double,
     private val projectileLaunchSpeedPerSecond: Double
-) : GameObject, RiderEvents by events {
+) : GameObject, RiderEventsProvider by eventsProvider {
 
     private var movementPerSecond: IPoint = Point(0)
         set(value) {
@@ -22,9 +22,16 @@ class RiderArcher(
     private val shooter: Shooter = Shooter.Base({ view.pos.copy() }, projectileCreator)
 
     override fun update(dt: TimeSpan) {
+        events(dt)
+        movement(dt)
+    }
+
+    private fun movement(dt: TimeSpan) {
         val vector = movementPerSecond * (dt / 1.seconds)
         view.pos += vector
-        val events = events()
+    }
+
+    private fun events(dt: TimeSpan) {
         events.forEach { event ->
             println(event)
             when (event) {
@@ -42,23 +49,4 @@ class RiderArcher(
             movementPerSecond = Point.Zero
         }
     }
-}
-
-interface RiderEvents {
-
-    fun attach(view: View)
-
-    fun events(): List<RiderEvent>
-}
-
-sealed class RiderEvent {
-    sealed class Move(private val point: IPoint) : RiderEvent() {
-        object Up : Move(Point.Up)
-        object Down : Move(Point.Down)
-        object Left : Move(Point.Left)
-        object Right : Move(Point.Right)
-
-        fun point(): IPoint = point.copy()
-    }
-    class Shoot(val destination: IPoint) : RiderEvent()
 }
