@@ -25,9 +25,10 @@ class MyScene : Scene() {
             projectileCreator,
             shooterView,
             riderEvents,
-            3.0,
-            2.0,
-            6.0
+            30.0,
+            20.0,
+            80.0,
+            140.0
         )
 
         projectileManager.start(this)

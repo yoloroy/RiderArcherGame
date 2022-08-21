@@ -6,26 +6,27 @@ class RiderArcher(
     projectileCreator: Projectile.Creator,
     private val view: View,
     private val events: RiderEvents,
-    private val speedAddition: Double,
-    private val stoppingSpeed: Double,
-    private val maxSpeed: Double
+    private val speedAdditionPerSecond: Double,
+    private val stoppingSpeedPerSecond: Double,
+    private val maxSpeedPerSecond: Double,
+    private val projectileLaunchSpeedPerSecond: Double
 ) : GameObject, RiderEvents by events {
 
     private var movementPerSecond: IPoint = Point(0)
         set(value) {
-            field = (if (value.length > maxSpeed) value.unit * maxSpeed else value)
+            field = (if (value.length > maxSpeedPerSecond) value.unit * maxSpeedPerSecond else value)
         }
-    private val shooter: Shooter = Shooter.Base(view.pos::copy, projectileCreator)
+    private val shooter: Shooter = Shooter.Base({ view.pos.copy() }, projectileCreator)
 
     override fun update(dt: TimeSpan) {
-        /*val vector = movementPerSecond * (dt / 1.seconds)
-        view.pos += vector*/
+        val vector = movementPerSecond * (dt / 1.seconds)
+        view.pos += vector
         val events = events()
         events.forEach { event ->
             println(event)
             when (event) {
-                is RiderEvent.Move -> movementPerSecond += event.point() * speedAddition
-                is RiderEvent.Shoot -> shooter.shoot(event.destination)
+                is RiderEvent.Move -> movementPerSecond += event.point() * speedAdditionPerSecond * (dt / 1.seconds)
+                is RiderEvent.Shoot -> shooter.shoot(event.destination, projectileLaunchSpeedPerSecond)
             }
         }
         if (events.filterIsInstance<RiderEvent.Move>().isEmpty()) stopping(dt)
@@ -33,7 +34,7 @@ class RiderArcher(
 
     private fun stopping(dt: TimeSpan) {
         if (movementPerSecond.length > 0.1) {
-            movementPerSecond -= movementPerSecond.unit * stoppingSpeed * (dt / 1.seconds)
+            movementPerSecond -= movementPerSecond.unit * stoppingSpeedPerSecond * (dt / 1.seconds)
         } else {
             movementPerSecond = Point.Zero
         }
