@@ -33,7 +33,6 @@ class RiderArcher(
 
     private fun events(dt: TimeSpan) {
         events.forEach { event ->
-            println(event)
             when (event) {
                 is RiderEvent.Move -> movementPerSecond += event.point() * speedAdditionPerSecond * (dt / 1.seconds)
                 is RiderEvent.Shoot -> shooter.shoot(event.destination, projectileLaunchSpeedPerSecond)

@@ -10,7 +10,6 @@ interface Shooter {
 
         override fun shoot(destination: IPoint, speedPerSeconds: Double) {
             projectileCreator
-                .onReach { println("Shot complete") }
                 .create()
                 .launch(posProvider.get(), destination, speedPerSeconds)
         }
