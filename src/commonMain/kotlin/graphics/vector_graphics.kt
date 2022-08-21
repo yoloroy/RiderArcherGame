@@ -1,7 +1,5 @@
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
-import com.soywiz.korma.geom.*
-import com.soywiz.korma.geom.shape.*
 import com.soywiz.korma.geom.vector.*
 
 fun Container.arrow(color: RGBA = Colors.BLACK, block: View.() -> Unit = {}) = graphics {

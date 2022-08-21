@@ -1,6 +1,9 @@
+package units.rider
+
 import com.soywiz.klock.*
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
+import core.*
 
 class RiderArcher(
     projectileCreator: Projectile.Creator,

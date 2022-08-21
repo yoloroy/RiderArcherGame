@@ -1,4 +1,5 @@
-import com.soywiz.klock.*
+package core
+
 import com.soywiz.korge.view.*
 import com.soywiz.korio.lang.*
 

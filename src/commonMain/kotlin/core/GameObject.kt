@@ -1,3 +1,5 @@
+package core
+
 import com.soywiz.klock.*
 
 interface GameObject {

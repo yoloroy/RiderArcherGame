@@ -2,8 +2,9 @@ import com.soywiz.korev.*
 import com.soywiz.korge.input.*
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
+import units.rider.*
 
-class RiderEventsImpl(
+class PlayerRiderEvents(
     private val upKey: Key,
     private val downKey: Key,
     private val leftKey: Key,

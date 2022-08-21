@@ -1,4 +1,6 @@
-import ProjectileManager.ManageableProjectile
+package core
+
+import core.ProjectileManager.ManageableProjectile
 import com.soywiz.klock.*
 import com.soywiz.korge.view.*
 import com.soywiz.korge.view.tween.*

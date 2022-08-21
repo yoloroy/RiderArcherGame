@@ -1,16 +1,19 @@
-import com.soywiz.korge.view.*
-import com.soywiz.korim.color.Colors
-import com.soywiz.korim.color.RGBA
+package projectiles
 
-class Line1x5Projectile(
+import arrow
+import com.soywiz.korge.view.*
+import com.soywiz.korim.color.*
+import core.*
+
+class ArrowProjectile(
     container: Container,
-    color: RGBA,
-    onReachCallback: () -> Unit,
-    manager: ProjectileManager
+    manager: ProjectileManager,
+    color: RGBA = Colors.BLACK,
+    onReachCallback: () -> Unit = {},
 ) : BaseProjectile(
-    container.solidRect(5.0, 1.0, color),
+    container.arrow(color) { size(15, 2) },
     container,
-    onReachCallback = onReachCallback,
+    onReachCallback,
     manager
 ) {
 
@@ -21,11 +24,10 @@ class Line1x5Projectile(
     ) : Projectile.Creator {
 
         private var onReachCallback: () -> Unit = {}
-
         override fun onReach(block: () -> Unit) = apply {
             onReachCallback = block
         }
 
-        override fun create() = Line1x5Projectile(container, color, onReachCallback, manager)
+        override fun create() = ArrowProjectile(container, manager, color, onReachCallback)
     }
 }

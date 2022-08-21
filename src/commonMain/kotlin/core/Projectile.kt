@@ -1,3 +1,5 @@
+package core
+
 import com.soywiz.korma.geom.*
 
 interface Projectile {
