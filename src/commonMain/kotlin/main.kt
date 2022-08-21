@@ -13,7 +13,7 @@ suspend fun main() = Korge(width = 512, height = 512, bgcolor = Colors["#ffffff"
 class MyScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
         val projectileManager = BaseProjectileManager()
-        val projectileCreator = Line1x5Projectile.Creator(this, manager = projectileManager)
+        val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
         val shooterView = solidRect(10, 10, Colors.BLACK) {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
         }
