@@ -24,6 +24,16 @@ class MyScene : Scene() {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
             anchor(0.5, 0.5)
         }
+        val enemyRidersViews = listOf(
+            solidRect(10, 10, Colors.RED) {
+                position(this@sceneMain.width / 4, this@sceneMain.height / 4)
+                anchor(0.5, 0.5)
+            },
+            solidRect(10, 10, Colors.VIOLET) {
+                position(this@sceneMain.width / 4 * 3, this@sceneMain.height / 4 * 3)
+                anchor(0.5, 0.5)
+            }
+        )
 
         val hitRadius = 10.0
         val playerRiderArcher = RiderArcher(
@@ -36,20 +46,10 @@ class MyScene : Scene() {
             140.0,
             1.timesPerSecond
         )
-
-        val enemyRiders = listOf(
-            solidRect(10, 10, Colors.RED) {
-                position(this@sceneMain.width / 4, this@sceneMain.height / 4)
-                anchor(0.5, 0.5)
-            },
-            solidRect(10, 10, Colors.VIOLET) {
-                position(this@sceneMain.width / 4 * 3, this@sceneMain.height / 4 * 3)
-                anchor(0.5, 0.5)
-            }
-        ).map { view ->
+        val enemyRiders = enemyRidersViews.map { enemyRiderView ->
             RiderArcher(
-                view,
-                EnemyRiderArcherController(playerView, view, 50.0, hitRadius),
+                enemyRiderView,
+                EnemyRiderArcherController(playerView, enemyRiderView, 50.0, hitRadius),
                 projectileCreator,
                 55.0,
                 20.0,
