@@ -32,8 +32,8 @@ class EnemyRiderArcher(
         projectileLaunchSpeedPerSecond
     )
 
-    private fun onReach() {
-        if (arrowsDestinations.any() { enemyView.pos.distanceTo(it) < hitRadius }) {
+    private fun onReach(destination: IPoint) {
+        if (enemyView.pos.distanceTo(destination) < hitRadius) {
             println("enemy hit")
         } else {
             println("enemy miss")
@@ -45,7 +45,7 @@ class EnemyRiderArcher(
     override val events: List<RiderEvent> get() = mutableListOf<RiderEvent>().apply {
         val distancePoint = enemyView.pos - view.pos
 
-        if (currentTime() >= (lastShotTime + 10.seconds) && distancePoint.length < shootingDistance) {
+        if (currentTime() >= (lastShotTime + shootDelay) && distancePoint.length < shootingDistance) {
             lastShotTime = currentTime()
             add(RiderEvent.Shoot(enemyView.pos))
             arrowsDestinations += enemyView.pos.copy()

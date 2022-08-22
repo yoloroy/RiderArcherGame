@@ -3,13 +3,14 @@ package projectiles
 import arrow
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
+import com.soywiz.korma.geom.*
 import core.*
 
 class ArrowProjectile(
     container: Container,
     manager: ProjectileManager,
     color: RGBA = Colors.BLACK,
-    onReachCallback: () -> Unit = {},
+    onReachCallback: (destination: IPoint) -> Unit = {},
 ) : BaseProjectile(
     container.arrow(color) { size(15, 2) },
     container,
@@ -23,8 +24,8 @@ class ArrowProjectile(
         private val manager: ProjectileManager
     ) : Projectile.Creator {
 
-        private var onReachCallback: () -> Unit = {}
-        override fun onReach(block: () -> Unit) = apply {
+        private var onReachCallback: (destination: IPoint) -> Unit = {}
+        override fun onReach(block: (destination: IPoint) -> Unit) = apply {
             onReachCallback = block
         }
 

@@ -11,7 +11,7 @@ import kotlinx.coroutines.*
 open class BaseProjectile(
     private val view: View,
     private val container: Container,
-    private val onReachCallback: () -> Unit,
+    private val onReachCallback: (destination: IPoint) -> Unit,
     private val manager: ProjectileManager
 ) : ManageableProjectile {
 
@@ -38,7 +38,7 @@ open class BaseProjectile(
         }
     }
 
-    override fun onReach() = onReachCallback()
+    override fun onReach() = onReachCallback(destination)
 
     override fun clear() {
         container.removeChild(view)

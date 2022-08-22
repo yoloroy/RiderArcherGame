@@ -8,7 +8,7 @@ interface Projectile {
 
     interface Creator {
 
-        fun onReach(block: () -> Unit): Creator
+        fun onReach(block: (destination: IPoint) -> Unit): Creator
 
         fun create(): Projectile
     }
