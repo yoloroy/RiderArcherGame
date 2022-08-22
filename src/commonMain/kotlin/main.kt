@@ -20,60 +20,50 @@ class MyScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
         val projectileManager = BaseProjectileManager()
         val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
-        val shooterView = solidRect(10, 10, Colors.BLACK) {
+        val playerView = solidRect(10, 10, Colors.BLACK) {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
             anchor(0.5, 0.5)
         }
-        val riderEvents = PlayerRiderEventsProvider(Key.W, Key.S, Key.A, Key.D)
-        riderEvents.attach(this)
+        val playerController = PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D)
+        playerController.attach(this)
 
         val hitRadius = 10.0
-        val riderArcher = RiderArcher(
+        val playerRiderArcher = RiderArcher(
+            playerView,
+            playerController,
             projectileCreator,
-            shooterView,
-            riderEvents,
+            80.0,
             30.0,
             20.0,
-            80.0,
-            140.0
+            140.0,
+            1.timesPerSecond
         )
 
         val enemyRiders = listOf(
-            EnemyRiderArcher(
+            solidRect(10, 10, Colors.RED) {
+                position(this@sceneMain.width / 4, this@sceneMain.height / 4)
+                anchor(0.5, 0.5)
+            },
+            solidRect(10, 10, Colors.VIOLET) {
+                position(this@sceneMain.width / 4 * 3, this@sceneMain.height / 4 * 3)
+                anchor(0.5, 0.5)
+            }
+        ).map { view ->
+            RiderArcher(
+                view,
+                EnemyRiderArcherController(playerView, view, 50.0, hitRadius),
                 projectileCreator,
-                shooterView,
-                solidRect(10, 10, Colors.RED) {
-                    position(this@sceneMain.width / 4, this@sceneMain.height / 4)
-                    anchor(0.5, 0.5)
-                },
-                50.0,
+                55.0,
                 20.0,
                 15.0,
-                55.0,
                 100.0,
-                hitRadius,
-                0.5.seconds
-            ),
-            EnemyRiderArcher(
-                projectileCreator,
-                shooterView,
-                solidRect(10, 10, Colors.VIOLET) {
-                    position(this@sceneMain.width / 4 * 3, this@sceneMain.height / 4 * 3)
-                    anchor(0.5, 0.5)
-                },
-                50.0,
-                20.0,
-                15.0,
-                55.0,
-                100.0,
-                hitRadius,
-                0.5.seconds
+                0.5.timesPerSecond
             )
-        )
+        }
 
         projectileManager.start(this)
         addUpdater { dt ->
-            riderArcher.update(dt)
+            playerRiderArcher.update(dt)
             enemyRiders.forEach {
                 it.update(dt)
             }

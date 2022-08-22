@@ -4,20 +4,24 @@ import com.soywiz.korev.*
 import com.soywiz.korge.input.*
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
+import core.gameobject.*
+import core.gameobject.EventsBasedGameObject.Event
+import core.gameobject.WarriorGameObject.*
 import units.rider.*
 
-class PlayerRiderEventsProvider(
+class PlayerRiderArcherController(
     private val upKey: Key,
     private val downKey: Key,
     private val leftKey: Key,
     private val rightKey: Key
-) : RiderEventsProvider {
+) : RiderArcher.Controller {
 
     private var up = false
     private var down = false
     private var left = false
     private var right = false
     private var shoot: IPoint? = null
+    override val shootPos: IPoint get() = shoot!!
 
     fun attach(view: View) {
         with(view) {
@@ -38,14 +42,22 @@ class PlayerRiderEventsProvider(
         }
     }
 
-    override val events get() = mutableListOf<RiderEvent>().apply {
-        if (up) add(RiderEvent.Move.Up)
-        if (down) add(RiderEvent.Move.Down)
-        if (left) add(RiderEvent.Move.Left)
-        if (right) add(RiderEvent.Move.Right)
+    override fun onReach(destination: IPoint) {
+        println("$destination is reached")
+    }
+
+    override val events get() = mutableListOf<Event>().apply {
+        if (up) add(moveUp)
+        if (down) add(moveDown)
+        if (left) add(moveLeft)
+        if (right) add(moveRight)
         shoot?.let {
-            add(RiderEvent.Shoot(it.copy()))
-            shoot = null
+            add(AttackEvent)
         }
     }
+
+    private val moveUp get() = MoveEvent(Point.Up)
+    private val moveDown get() = MoveEvent(Point.Down)
+    private val moveLeft get() = MoveEvent(Point.Left)
+    private val moveRight get() = MoveEvent(Point.Right)
 }
