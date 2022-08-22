@@ -24,13 +24,11 @@ class MyScene : Scene() {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
             anchor(0.5, 0.5)
         }
-        val playerController = PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D)
-        playerController.attach(this)
 
         val hitRadius = 10.0
         val playerRiderArcher = RiderArcher(
             playerView,
-            playerController,
+            PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D).also { it.attach(this) },
             projectileCreator,
             80.0,
             30.0,
