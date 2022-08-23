@@ -8,9 +8,10 @@ import core.*
 import enemies.*
 import player.*
 import projectiles.*
+import ui.*
 import units.rider.*
 
-suspend fun main() = Korge(width = 512, height = 512, bgcolor = Colors["#ffffff"]) {
+suspend fun main() = Korge(width = 512, height = 512, bgcolor = Colors.WHEAT) {
     val sceneContainer = sceneContainer()
 
     sceneContainer.changeTo({ MyScene() })
@@ -20,9 +21,12 @@ class MyScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
         val projectileManager = BaseProjectileManager()
         val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
-        val playerView = solidRect(10, 10, Colors.BLACK) {
+        var healthBar: HealthBarViewHolder
+        val playerView = container {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
-            anchor(0.5, 0.5)
+
+            solidRect(10, 10, Colors.BLACK) { position(8.0, 1.0) } // archer with horse will be here
+            healthBar = healthBar(10.0, 4.0, Colors.BLACK, Colors.BLACK, Colors.RED, 1.0)
         }
         val enemyRidersViews = listOf(
             solidRect(10, 10, Colors.RED) {
