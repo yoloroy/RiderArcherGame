@@ -7,8 +7,7 @@ import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
 import com.soywiz.korma.geom.Point
-import com.soywiz.korma.geom.plus
-import core.BaseProjectileManager
+import core.*
 import enemies.EnemyRiderArcherController
 import player.PlayerRiderArcherController
 import projectiles.ArrowProjectile
@@ -30,7 +29,6 @@ class GameScene : Scene() {
             solidRect(10, 10, Colors.BLACK) { position(1.0, 8.0) } // archer with horse will be here
             playerHealthBar = healthBar(10.0, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
         }
-        val playerPosGetter = { playerView.pos + playerView.sizePoint / 2 }
         val enemyRidersViews = listOf(
             solidRect(10, 10, Colors.RED) {
                 position(this@sceneMain.width / 4, this@sceneMain.height / 4)
@@ -59,12 +57,13 @@ class GameScene : Scene() {
 
         val playerRiderArcher = RiderArcher(
             playerView,
-            PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D) {
-                attackManager.attack(
-                    it,
-                    playerStrength
-                )
-            }.also { it.attach(this) },
+            PlayerRiderArcherController(
+                Key.W,
+                Key.S,
+                Key.A,
+                Key.D,
+                onReachCallback = { pos -> attackManager.attack(pos, playerStrength) }
+            ).also { it.attach(this) },
             projectileCreator,
             maxMovementPerSecond = 80.0,
             speedAdditionPerSecond = 30.0,
@@ -75,12 +74,12 @@ class GameScene : Scene() {
         val enemyRiders = enemyRidersViews.map { enemyRiderView ->
             RiderArcher(
                 enemyRiderView,
-                EnemyRiderArcherController(playerPosGetter, enemyRiderView, 50.0) {
-                    attackManager.attack(
-                        it,
-                        enemyStrength
-                    )
-                },
+                EnemyRiderArcherController(
+                    PosProvider.ofViewCenter(playerView),
+                    enemyRiderView,
+                    50.0,
+                    onReachCallback = { pos -> attackManager.attack(pos, enemyStrength) }
+                ),
                 projectileCreator,
                 maxMovementPerSecond = 55.0,
                 speedAdditionPerSecond = 20.0,

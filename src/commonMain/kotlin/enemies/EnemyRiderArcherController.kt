@@ -2,13 +2,14 @@ package enemies
 
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
+import core.*
 import core.gameobject.*
 import core.gameobject.EventsBasedGameObject.Event
 import core.gameobject.WarriorGameObject.AttackEvent
 import units.rider.*
 
 class EnemyRiderArcherController(
-    private val targetPosProvider: TargetPosProvider,
+    private val targetPosProvider: PosProvider,
     private val view: View,
     private val shootingDistance: Double,
     private val onReachCallback: (destination: IPoint) -> Unit = {}
@@ -25,8 +26,4 @@ class EnemyRiderArcherController(
             MoveEvent(Point(view.angleTo(targetPosProvider.pos())))
         }
     )
-
-    fun interface TargetPosProvider {
-        fun pos(): IPoint
-    }
 }

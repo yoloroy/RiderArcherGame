@@ -1,6 +1,6 @@
 package core
 
-import com.soywiz.korma.geom.IPoint
+import com.soywiz.korma.geom.*
 
 interface Shooter {
 
@@ -11,11 +11,7 @@ interface Shooter {
         override fun shoot(destination: IPoint, speedPerSeconds: Double) {
             projectileCreator
                 .create()
-                .launch(posProvider.get(), destination, speedPerSeconds)
-        }
-
-        fun interface PosProvider {
-            fun get(): IPoint
+                .launch(posProvider.pos(), destination, speedPerSeconds)
         }
     }
 }

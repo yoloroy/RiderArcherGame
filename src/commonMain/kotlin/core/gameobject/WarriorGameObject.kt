@@ -22,7 +22,7 @@ abstract class WarriorGameObject(
         projectileCreator.onReach(::onProjectileArrived)
     }
 
-    private val shooter: Shooter = Shooter.Base({ view.pos.copy() }, projectileCreator)
+    private val shooter: Shooter = Shooter.Base(PosProvider.ofViewCenter(view), projectileCreator)
 
     override fun consumeEvent(dt: TimeSpan, event: Event) {
         val currentTime = DateTime.now().time.encoded
