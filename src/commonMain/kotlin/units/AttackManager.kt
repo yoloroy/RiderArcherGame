@@ -1,9 +1,11 @@
 package units
 
+import com.soywiz.korio.concurrent.atomic.*
 import com.soywiz.korma.geom.*
 
 class AttackManager(
-    private val hittableUnits: List<HittableUnit>
+    units: List<HittableUnit>
 ) {
-    fun attack(destination: IPoint, strength: Int) = hittableUnits.forEach { it.tryToHit(destination, strength) }
+    var units by KorAtomicRef(units)
+    fun attack(destination: IPoint, strength: Int) = units.forEach { it.tryToHit(destination, strength) }
 }

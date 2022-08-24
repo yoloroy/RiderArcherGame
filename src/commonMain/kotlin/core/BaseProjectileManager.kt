@@ -2,10 +2,11 @@ package core
 
 import core.ProjectileManager.ManageableProjectile
 import com.soywiz.korge.view.*
+import com.soywiz.korio.concurrent.atomic.*
 
 class BaseProjectileManager : ProjectileManager {
 
-    private var projectiles: List<ManageableProjectile> = emptyList()
+    private var projectiles by KorAtomicRef(emptyList<ManageableProjectile>())
 
     override fun start(mainView: View) = mainView.addUpdater { dt ->
         for (projectile in projectiles) {
