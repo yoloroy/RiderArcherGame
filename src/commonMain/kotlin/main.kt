@@ -62,22 +62,22 @@ class MyScene : Scene() {
             playerView,
             PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D) { attackManager.attack(it, playerStrength) }.also { it.attach(this) },
             projectileCreator,
-            80.0,
-            30.0,
-            50.0,
-            140.0,
-            1.timesPerSecond
+            maxMovementPerSecond = 80.0,
+            speedAdditionPerSecond = 30.0,
+            speedReductionPerSecond = 50.0,
+            projectileMovementPerSecond = 140.0,
+            attackFrequency = 1.timesPerSecond
         )
         val enemyRiders = enemyRidersViews.map { enemyRiderView ->
             RiderArcher(
                 enemyRiderView,
                 EnemyRiderArcherController(playerPosGetter, enemyRiderView, 50.0) { attackManager.attack(it, enemyStrength) },
                 projectileCreator,
-                55.0,
-                20.0,
-                15.0,
-                100.0,
-                0.5.timesPerSecond
+                maxMovementPerSecond = 55.0,
+                speedAdditionPerSecond = 20.0,
+                speedReductionPerSecond = 15.0,
+                projectileMovementPerSecond = 100.0,
+                attackFrequency = 0.5.timesPerSecond
             )
         }
 
