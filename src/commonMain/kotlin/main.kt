@@ -4,12 +4,15 @@ import com.soywiz.korge.*
 import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
+import com.soywiz.korma.geom.*
 import core.*
 import enemies.*
 import player.*
 import projectiles.*
 import ui.*
+import units.*
 import units.rider.*
+import util.*
 
 suspend fun main() = Korge(width = 512, height = 512, bgcolor = Colors.WHEAT) {
     val sceneContainer = sceneContainer()
@@ -21,13 +24,14 @@ class MyScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
         val projectileManager = BaseProjectileManager()
         val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
-        var healthBar: HealthBarViewHolder
+        var playerHealthBar: HealthBarViewHolder? = null // todo fix nullability
         val playerView = container {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
 
-            solidRect(10, 10, Colors.BLACK) { position(8.0, 1.0) } // archer with horse will be here
-            healthBar = healthBar(10.0, 4.0, Colors.BLACK, Colors.BLACK, Colors.RED, 1.0)
+            solidRect(10, 10, Colors.BLACK) { position(1.0, 8.0) } // archer with horse will be here
+            playerHealthBar = healthBar(10.0, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
         }
+        val playerPosGetter = { playerView.pos + playerView.sizePoint / 2 }
         val enemyRidersViews = listOf(
             solidRect(10, 10, Colors.RED) {
                 position(this@sceneMain.width / 4, this@sceneMain.height / 4)
@@ -38,22 +42,36 @@ class MyScene : Scene() {
                 anchor(0.5, 0.5)
             }
         )
+        val units = listOf(
+            UnitImpl(
+                playerView,
+                playerView.sizePoint / 2,
+                100,
+                10.0,
+                healthObserver = { _, new, max -> playerHealthBar!!.update(new.toDouble() / max) }
+            ),
+        ) + enemyRidersViews.map { view ->
+            UnitImpl(view, Point.Zero, 20, 15.0)
+        }
+        val attackManager = AttackManager(units)
 
-        val hitRadius = 10.0
+        val playerStrength = 20
+        val enemyStrength = 15
+
         val playerRiderArcher = RiderArcher(
             playerView,
-            PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D).also { it.attach(this) },
+            PlayerRiderArcherController(Key.W, Key.S, Key.A, Key.D) { attackManager.attack(it, playerStrength) }.also { it.attach(this) },
             projectileCreator,
             80.0,
             30.0,
-            20.0,
+            50.0,
             140.0,
             1.timesPerSecond
         )
         val enemyRiders = enemyRidersViews.map { enemyRiderView ->
             RiderArcher(
                 enemyRiderView,
-                EnemyRiderArcherController(playerView, enemyRiderView, 50.0, hitRadius),
+                EnemyRiderArcherController(playerPosGetter, enemyRiderView, 50.0) { attackManager.attack(it, enemyStrength) },
                 projectileCreator,
                 55.0,
                 20.0,

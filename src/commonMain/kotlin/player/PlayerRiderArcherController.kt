@@ -13,7 +13,8 @@ class PlayerRiderArcherController(
     private val upKey: Key,
     private val downKey: Key,
     private val leftKey: Key,
-    private val rightKey: Key
+    private val rightKey: Key,
+    private val onReachCallback: (destination: IPoint) -> Unit = {}
 ) : RiderArcher.Controller {
 
     private var up = false
@@ -42,9 +43,7 @@ class PlayerRiderArcherController(
         }
     }
 
-    override fun onReach(destination: IPoint) {
-        println("$destination is reached")
-    }
+    override fun onReach(destination: IPoint) = onReachCallback(destination)
 
     override val events get() = mutableListOf<Event>().apply {
         if (up) add(moveUp)
