@@ -2,7 +2,7 @@ package units
 
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
-import kotlin.properties.*
+import kotlin.properties.Delegates.observable
 
 class UnitImpl(
     private val view: View,
@@ -12,7 +12,7 @@ class UnitImpl(
     health: Int = maxHealth,
     private val healthObserver: HealthObserver = HealthObserver.Unit
 ) : HittableUnit {
-    override var health by Delegates.observable(health) { _, old, new -> healthObserver.onChange(old, new, maxHealth) }
+    override var health by observable(health) { _, old, new -> healthObserver.onChange(old, new, maxHealth) }
     override val pos: IPoint get() = view.pos + hitBoxOffset
 
     fun interface HealthObserver {
