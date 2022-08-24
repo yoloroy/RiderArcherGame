@@ -25,6 +25,7 @@ open class BaseProjectile(
         this.speedVectorPerSecond = (destination - start).unit * speedPerSecond
         launchImmediately(Dispatchers.Default) {
             view.pos = start
+            view.invalidateMatrix()
             view.rotateTo(start.angleTo(destination), TimeSpan.ZERO)
         }
         manager.onLaunch(this)
@@ -33,6 +34,7 @@ open class BaseProjectile(
     override fun update(dt: TimeSpan) {
         val vector = speedVectorPerSecond * (dt / 1.seconds)
         view.pos += vector
+        view.invalidateMatrix()
         if (destination.distanceTo(view.pos) <= (vector.length * 2)) {
             manager.onFinish(this)
         }

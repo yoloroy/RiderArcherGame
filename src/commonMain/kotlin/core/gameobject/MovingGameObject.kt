@@ -14,6 +14,7 @@ abstract class MovingGameObject(
     override fun consumeEvent(dt: TimeSpan, event: Event) {
         if (event is MoveEvent) {
             view.pos += event.direction * movementPerSecond * dt.seconds
+            view.invalidateMatrix()
         }
     }
 }

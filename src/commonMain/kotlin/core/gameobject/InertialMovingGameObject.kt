@@ -23,6 +23,7 @@ abstract class InertialMovingGameObject(
         hasMoved = false
         super.update(dt)
         view.pos += movementVectorPerSecond * dt.seconds
+        view.invalidateMatrix()
         if (!hasMoved) if (movementVectorPerSecond.length > 0.1) {
             movementVectorPerSecond -= movementVectorPerSecond.unit * speedReductionPerSecond * dt.seconds
         } else {
