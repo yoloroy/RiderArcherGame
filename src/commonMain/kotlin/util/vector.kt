@@ -7,3 +7,5 @@ fun IPoint.coerceLengthIn(range: ClosedRange<Double>): IPoint = when {
     length < range.start -> unit * range.start
     else -> copy()
 }
+
+fun Anchor.toPoint() = Point(sx, sy)

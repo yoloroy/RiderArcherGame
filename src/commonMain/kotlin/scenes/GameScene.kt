@@ -6,7 +6,7 @@ import com.soywiz.korge.input.*
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.Colors
-import com.soywiz.korma.geom.Point
+import com.soywiz.korma.geom.*
 import core.*
 import enemies.EnemyRiderArcherController
 import player.PlayerRiderArcherController
@@ -16,7 +16,7 @@ import ui.healthBar
 import units.AttackManager
 import units.UnitImpl
 import units.rider.RiderArcher
-import util.sizePoint
+import util.*
 
 class GameScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
@@ -50,7 +50,7 @@ class GameScene : Scene() {
         ) + enemyRidersViews.map { view ->
             UnitImpl(view, Point.Zero, 20, 15.0)
         }
-        val attackManager = AttackManager(units)
+        val attackManager: AttackManager = AttackManager.Base(units)
 
         val playerStrength = 20
         val enemyStrength = 15
@@ -75,7 +75,7 @@ class GameScene : Scene() {
             RiderArcher(
                 enemyRiderView,
                 EnemyRiderArcherController(
-                    PosProvider.ofViewCenter(playerView),
+                    playerView.asPosProvider(Anchor.CENTER),
                     enemyRiderView,
                     50.0,
                     onReachCallback = { pos -> attackManager.attack(pos, enemyStrength) }
@@ -90,7 +90,7 @@ class GameScene : Scene() {
         }
 
         projectileManager.start(this)
-        addUpdater { dt ->
+        addUpdater { dt -> // TODO: add manager for this and for destroying with clearing like in ProjectileManager
             playerRiderArcher.update(dt)
             enemyRiders.forEach {
                 it.update(dt)

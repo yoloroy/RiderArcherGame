@@ -6,7 +6,7 @@ import com.soywiz.korio.concurrent.atomic.*
 
 class BaseProjectileManager : ProjectileManager {
 
-    private var projectiles by KorAtomicRef(emptyList<ManageableProjectile>())
+    private var projectiles by KorAtomicRef(emptySet<ManageableProjectile>())
 
     override fun start(mainView: View) = mainView.addUpdater { dt ->
         for (projectile in projectiles) {
