@@ -11,7 +11,7 @@ interface AttackManager {
 
     fun removeUnit(unit: HittableUnit)
 
-    class Base(units: Collection<HittableUnit>) : AttackManager {
+    class Base(units: Collection<HittableUnit> = emptySet()) : AttackManager {
 
         private var units by KorAtomicRef(units.toSet())
 

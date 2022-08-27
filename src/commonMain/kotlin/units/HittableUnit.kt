@@ -8,6 +8,10 @@ interface HittableUnit {
     val hitRadius: Double
 }
 
-fun HittableUnit.tryToHit(attackDestination: IPoint, strength: Int) = if (isHit(attackDestination)) health -= strength else Unit
+// returns is this hit has killed unit
+fun HittableUnit.tryToHit(attackDestination: IPoint, strength: Int): Boolean {
+    if (isHit(attackDestination)) health -= strength
+    return health < 0
+}
 
 fun HittableUnit.isHit(attackDestination: IPoint): Boolean = pos.distanceTo(attackDestination) < hitRadius

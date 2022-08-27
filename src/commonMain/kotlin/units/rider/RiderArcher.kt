@@ -4,11 +4,12 @@ import com.soywiz.klock.*
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
 import core.*
-import core.gameobject.EventsBasedGameObject.*
+import core.GameObjectManager.ManageableGameObject
 import core.gameobject.*
+import core.gameobject.EventsBasedGameObject.EventsProvider
 
 class RiderArcher(
-    view: View,
+    private val view: View,
     controller: Controller,
     projectileCreator: Projectile.Creator,
     maxMovementPerSecond: Double,
@@ -16,7 +17,7 @@ class RiderArcher(
     speedReductionPerSecond: Double,
     projectileMovementPerSecond: Double,
     attackFrequency: Frequency
-) : GameObject {
+) : ManageableGameObject {
 
     // region components
     private val horseRiding = InertialMovingGameObject.Static(view, controller, maxMovementPerSecond, speedReductionPerSecond, speedAdditionPerSecond)
@@ -25,6 +26,10 @@ class RiderArcher(
     // endregion
 
     override fun update(dt: TimeSpan) = components.forEach { it.update(dt) }
+
+    override fun remove() {
+        view.removeFromParent()
+    }
 
     inner class ShootingComponent(
         view: View,

@@ -12,14 +12,14 @@ class UnitImpl(
     health: Int = maxHealth,
     private val healthObserver: HealthObserver = HealthObserver.Unit
 ) : HittableUnit {
-    override var health by observable(health) { _, old, new -> healthObserver.onChange(old, new, maxHealth) }
+    override var health by observable(health) { _, old, new -> healthObserver.onChange(this, old, new, maxHealth) }
     override val pos: IPoint get() = view.pos + hitBoxOffset
 
     fun interface HealthObserver {
-        fun onChange(oldHealth: Int, newHealth: Int, maxHealth: Int)
+        fun onChange(unit: UnitImpl, oldHealth: Int, newHealth: Int, maxHealth: Int)
 
         object Unit : HealthObserver {
-            override fun onChange(oldHealth: Int, newHealth: Int, maxHealth: Int) {}
+            override fun onChange(unit: UnitImpl, oldHealth: Int, newHealth: Int, maxHealth: Int) {}
         }
     }
 }

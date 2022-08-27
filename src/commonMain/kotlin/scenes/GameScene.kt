@@ -1,26 +1,35 @@
 package scenes
 
-import com.soywiz.klock.timesPerSecond
-import com.soywiz.korev.Key
+import com.soywiz.klock.*
+import com.soywiz.korev.*
 import com.soywiz.korge.input.*
-import com.soywiz.korge.scene.Scene
+import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
-import com.soywiz.korim.color.Colors
+import com.soywiz.korim.color.*
+import com.soywiz.korio.concurrent.atomic.*
+import com.soywiz.korio.lang.*
 import com.soywiz.korma.geom.*
 import core.*
-import enemies.EnemyRiderArcherController
-import player.PlayerRiderArcherController
-import projectiles.ArrowProjectile
-import ui.HealthBarViewHolder
-import ui.healthBar
-import units.AttackManager
-import units.UnitImpl
-import units.rider.RiderArcher
+import core.GameObjectManager.ManageableGameObject
+import enemies.*
+import kotlinx.coroutines.*
+import player.*
+import projectiles.*
+import ui.*
+import units.*
+import units.rider.*
 import util.*
 
-class GameScene : Scene() {
+class GameScene(
+    private val projectileManager: ProjectileManager = BaseProjectileManager(),
+    private val attackManager: AttackManager = AttackManager.Base()
+) : Scene(), GameObjectManager, AttackManager by attackManager {
+
+    private val associations = mutableMapOf<View, Pair<ManageableGameObject?, HittableUnit?>>() // TODO refactor
+    private var gameObjects by KorAtomicRef(emptySet<GameObject>())
+    private var score = 0
+
 	override suspend fun SContainer.sceneMain() {
-        val projectileManager = BaseProjectileManager()
         val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
         var playerHealthBar: HealthBarViewHolder? = null // todo fix nullability
         val playerView = container {
@@ -39,30 +48,40 @@ class GameScene : Scene() {
                 anchor(0.5, 0.5)
             }
         )
+        val views = enemyRidersViews + playerView
+        views.forEach { associations[it] = null to null }
         val units = listOf(
             UnitImpl(
                 playerView,
                 playerView.sizePoint / 2,
                 100,
                 10.0,
-                healthObserver = { _, new, max -> playerHealthBar!!.update(new.toDouble() / max) }
-            ),
+                healthObserver = { _, _, new, max ->
+                    playerHealthBar!!.update(new.toDouble() / max)
+                    if (new < 0) launch {
+                        sceneContainer.changeTo({GameOverScene(score)})
+                    }
+                }
+            ).also { associations[playerView] = associations[playerView]!!.copy(second = it) },
         ) + enemyRidersViews.map { view ->
-            UnitImpl(view, Point.Zero, 20, 15.0)
+            UnitImpl(
+                view,
+                Point.Zero,
+                20,
+                15.0,
+                healthObserver = { unit, _, new, _ -> if (new < 0) removeUnit(unit) }
+            ).also { associations[view] = associations[view]!!.copy(second = it) }
         }
-        val attackManager: AttackManager = AttackManager.Base(units)
+        units.forEach(::addUnit)
 
         val playerStrength = 20
         val enemyStrength = 15
 
-        val playerRiderArcher = RiderArcher(
+        RiderArcher(
             playerView,
             PlayerRiderArcherController(
-                Key.W,
-                Key.S,
-                Key.A,
-                Key.D,
-                onReachCallback = { pos -> attackManager.attack(pos, playerStrength) }
+                Key.W, Key.S, Key.A, Key.D,
+                onReachCallback = { pos -> attack(pos, playerStrength) }
             ).also { it.attach(this) },
             projectileCreator,
             maxMovementPerSecond = 80.0,
@@ -70,15 +89,18 @@ class GameScene : Scene() {
             speedReductionPerSecond = 50.0,
             projectileMovementPerSecond = 140.0,
             attackFrequency = 1.timesPerSecond
-        )
-        val enemyRiders = enemyRidersViews.map { enemyRiderView ->
+        ).also {
+            onStart(it)
+            associations[playerView] = associations[playerView]!!.copy(first =  it)
+        }
+        enemyRidersViews.forEach { enemyRiderView ->
             RiderArcher(
                 enemyRiderView,
                 EnemyRiderArcherController(
                     playerView.asPosProvider(Anchor.CENTER),
                     enemyRiderView,
                     50.0,
-                    onReachCallback = { pos -> attackManager.attack(pos, enemyStrength) }
+                    onReachCallback = { pos -> attack(pos, enemyStrength) }
                 ),
                 projectileCreator,
                 maxMovementPerSecond = 55.0,
@@ -86,20 +108,38 @@ class GameScene : Scene() {
                 speedReductionPerSecond = 15.0,
                 projectileMovementPerSecond = 100.0,
                 attackFrequency = 0.5.timesPerSecond
-            )
-        }
-
-        projectileManager.start(this)
-        addUpdater { dt -> // TODO: add manager for this and for destroying with clearing like in ProjectileManager
-            playerRiderArcher.update(dt)
-            enemyRiders.forEach {
-                it.update(dt)
+            ).also {
+                onStart(it)
+                associations[enemyRiderView] = associations[enemyRiderView]!!.copy(first =  it)
             }
         }
+
+        start(this)
+	}
+
+    override fun start(mainView: View): Cancellable = with(mainView) {
         keys {
             down(Key.ESCAPE) {
                 sceneContainer.changeTo({MainMenuScene()})
             }
         }
-	}
+
+        return Cancellable(listOf(
+            projectileManager.start(this),
+            addUpdater { dt -> gameObjects.forEach { it.update(dt) } }
+        ))
+    }
+
+    override fun onStart(gameObject: ManageableGameObject) { gameObjects += gameObject }
+
+    override fun remove(gameObject: ManageableGameObject) {
+        gameObjects -= gameObject.also { it.remove() }
+    }
+
+    override fun removeUnit(unit: HittableUnit) {
+        attackManager.removeUnit(unit)
+        val gameObject = associations.toList().find { (_, pair) -> pair.second == unit }!!.second.first!! // TODO
+        remove(gameObject)
+        score += 1
+    }
 }
