@@ -5,6 +5,8 @@ import com.soywiz.korma.geom.*
 
 interface AttackManager {
 
+    val units: Set<HittableUnit>
+
     fun attack(destination: IPoint, strength: Int)
 
     fun addUnit(unit: HittableUnit)
@@ -13,7 +15,8 @@ interface AttackManager {
 
     class Base(units: Collection<HittableUnit> = emptySet()) : AttackManager {
 
-        private var units by KorAtomicRef(units.toSet())
+        override var units by KorAtomicRef(units.toSet())
+            private set
 
         override fun attack(destination: IPoint, strength: Int) = units.forEach { it.tryToHit(destination, strength) }
 

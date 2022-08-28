@@ -142,5 +142,8 @@ class GameScene(
     override fun removeUnit(unit: HittableUnit) {
         attackManager.removeUnit(unit)
         score += 1
+        if (units.size == 1) launch {
+            sceneContainer.changeTo({GameOverScene(score)})
+        }
     }
 }
