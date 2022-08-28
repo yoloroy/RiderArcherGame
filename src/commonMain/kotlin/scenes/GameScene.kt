@@ -25,7 +25,6 @@ class GameScene(
     private val attackManager: AttackManager = AttackManager.Base()
 ) : Scene(), GameObjectManager, AttackManager by attackManager {
 
-    private val associations = mutableMapOf<View, Pair<ManageableGameObject?, HittableUnit?>>() // TODO refactor
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
 
@@ -48,9 +47,12 @@ class GameScene(
                 anchor(0.5, 0.5)
             }
         )
-        val views = enemyRidersViews + playerView
-        views.forEach { associations[it] = null to null }
-        val units = listOf(
+
+        val playerStrength = 20
+        val enemyStrength = 15
+
+        RiderArcher(
+            playerView,
             UnitImpl(
                 playerView,
                 playerView.sizePoint / 2,
@@ -62,23 +64,7 @@ class GameScene(
                         sceneContainer.changeTo({GameOverScene(score)})
                     }
                 }
-            ).also { associations[playerView] = associations[playerView]!!.copy(second = it) },
-        ) + enemyRidersViews.map { view ->
-            UnitImpl(
-                view,
-                Point.Zero,
-                20,
-                15.0,
-                healthObserver = { unit, _, new, _ -> if (new < 0) removeUnit(unit) }
-            ).also { associations[view] = associations[view]!!.copy(second = it) }
-        }
-        units.forEach(::addUnit)
-
-        val playerStrength = 20
-        val enemyStrength = 15
-
-        RiderArcher(
-            playerView,
+            ),
             PlayerRiderArcherController(
                 Key.W, Key.S, Key.A, Key.D,
                 onReachCallback = { pos -> attack(pos, playerStrength) }
@@ -90,12 +76,19 @@ class GameScene(
             projectileMovementPerSecond = 140.0,
             attackFrequency = 1.timesPerSecond
         ).also {
-            onStart(it)
-            associations[playerView] = associations[playerView]!!.copy(first =  it)
+            add(it)
         }
-        enemyRidersViews.forEach { enemyRiderView ->
+        val enemyRiderArchers = mutableListOf<RiderArcher>()
+        enemyRidersViews.forEachIndexed { i, enemyRiderView ->
             RiderArcher(
                 enemyRiderView,
+                UnitImpl(
+                    enemyRiderView,
+                    Point.Zero,
+                    20,
+                    15.0,
+                    healthObserver = { _, _, new, _ -> if (new < 0) remove(enemyRiderArchers[i]) }
+                ),
                 EnemyRiderArcherController(
                     playerView.asPosProvider(Anchor.CENTER),
                     enemyRiderView,
@@ -109,13 +102,23 @@ class GameScene(
                 projectileMovementPerSecond = 100.0,
                 attackFrequency = 0.5.timesPerSecond
             ).also {
-                onStart(it)
-                associations[enemyRiderView] = associations[enemyRiderView]!!.copy(first =  it)
+                enemyRiderArchers += it
+                add(it)
             }
         }
 
         start(this)
 	}
+
+    private fun <T> remove(gameObject: T) where T : ManageableGameObject, T : HittableUnit {
+        removeGameObject(gameObject)
+        removeUnit(gameObject)
+    }
+
+    private fun <T> add(gameObject: T) where T : ManageableGameObject, T : HittableUnit {
+        onStart(gameObject)
+        addUnit(gameObject)
+    }
 
     override fun start(mainView: View): Cancellable = with(mainView) {
         keys {
@@ -132,14 +135,12 @@ class GameScene(
 
     override fun onStart(gameObject: ManageableGameObject) { gameObjects += gameObject }
 
-    override fun remove(gameObject: ManageableGameObject) {
+    override fun removeGameObject(gameObject: ManageableGameObject) {
         gameObjects -= gameObject.also { it.remove() }
     }
 
     override fun removeUnit(unit: HittableUnit) {
         attackManager.removeUnit(unit)
-        val gameObject = associations.toList().find { (_, pair) -> pair.second == unit }!!.second.first!! // TODO
-        remove(gameObject)
         score += 1
     }
 }

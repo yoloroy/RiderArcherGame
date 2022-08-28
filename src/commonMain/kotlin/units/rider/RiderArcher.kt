@@ -7,9 +7,11 @@ import core.*
 import core.GameObjectManager.ManageableGameObject
 import core.gameobject.*
 import core.gameobject.EventsBasedGameObject.EventsProvider
+import units.*
 
 class RiderArcher(
     private val view: View,
+    hittableUnit: HittableUnit,
     controller: Controller,
     projectileCreator: Projectile.Creator,
     maxMovementPerSecond: Double,
@@ -17,7 +19,7 @@ class RiderArcher(
     speedReductionPerSecond: Double,
     projectileMovementPerSecond: Double,
     attackFrequency: Frequency
-) : ManageableGameObject {
+) : ManageableGameObject, HittableUnit by hittableUnit {
 
     // region components
     private val horseRiding = InertialMovingGameObject.Static(view, controller, maxMovementPerSecond, speedReductionPerSecond, speedAdditionPerSecond)

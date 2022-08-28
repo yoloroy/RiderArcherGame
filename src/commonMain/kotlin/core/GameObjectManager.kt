@@ -9,7 +9,7 @@ interface GameObjectManager {
 
     fun onStart(gameObject: ManageableGameObject)
 
-    fun remove(gameObject: ManageableGameObject)
+    fun removeGameObject(gameObject: ManageableGameObject)
 
     interface ManageableGameObject : GameObject {
 
