@@ -27,9 +27,10 @@ class GameScene(
 
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
+    private lateinit var playerPosProvider: PosProvider
 
 	override suspend fun SContainer.sceneMain() {
-        val projectileCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
+        val arrowsCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
         var playerHealthBar: HealthBarViewHolder? = null // todo fix nullability
         val playerView = container {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
@@ -37,19 +38,9 @@ class GameScene(
             solidRect(10, 10, Colors.BLACK) { position(1.0, 8.0) } // archer with horse will be here
             playerHealthBar = healthBar(10.0, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
         }
-        val enemyRidersViews = listOf(
-            solidRect(10, 10, Colors.RED) {
-                position(this@sceneMain.width / 4, this@sceneMain.height / 4)
-                anchor(0.5, 0.5)
-            },
-            solidRect(10, 10, Colors.VIOLET) {
-                position(this@sceneMain.width / 4 * 3, this@sceneMain.height / 4 * 3)
-                anchor(0.5, 0.5)
-            }
-        )
+        playerPosProvider = playerView.asPosProvider(Anchor.CENTER)
 
         val playerStrength = 20
-        val enemyStrength = 15
 
         RiderArcher(
             playerView,
@@ -69,7 +60,7 @@ class GameScene(
                 Key.W, Key.S, Key.A, Key.D,
                 onReachCallback = { pos -> attack(pos, playerStrength) }
             ).also { it.attach(this) },
-            projectileCreator,
+            arrowsCreator,
             maxMovementPerSecond = 80.0,
             speedAdditionPerSecond = 30.0,
             speedReductionPerSecond = 50.0,
@@ -78,33 +69,14 @@ class GameScene(
         ).also {
             add(it)
         }
-        val enemyRiderArchers = mutableListOf<RiderArcher>()
-        enemyRidersViews.forEachIndexed { i, enemyRiderView ->
-            RiderArcher(
-                enemyRiderView,
-                UnitImpl(
-                    enemyRiderView,
-                    Point.Zero,
-                    20,
-                    15.0,
-                    healthObserver = { _, _, new, _ -> if (new < 0) remove(enemyRiderArchers[i]) }
-                ),
-                EnemyRiderArcherController(
-                    playerView.asPosProvider(Anchor.CENTER),
-                    enemyRiderView,
-                    50.0,
-                    onReachCallback = { pos -> attack(pos, enemyStrength) }
-                ),
-                projectileCreator,
-                maxMovementPerSecond = 55.0,
-                speedAdditionPerSecond = 20.0,
-                speedReductionPerSecond = 15.0,
-                projectileMovementPerSecond = 100.0,
-                attackFrequency = 0.5.timesPerSecond
-            ).also {
-                enemyRiderArchers += it
-                add(it)
-            }
+
+        repeat(4) {
+            val xRange = (width / 4 * 1)..(width / 4 * 3)
+            val yRange = (height / 4 * 1)..(height / 4 * 3)
+            val sides = listOf(Point.Right, Point.Down)
+            val posOnEdge = sides.random() * Point(xRange.random(), yRange.random())
+            println(posOnEdge)
+            enemyRiderArcher(posOnEdge, arrowsCreator)
         }
 
         start(this)
@@ -145,5 +117,71 @@ class GameScene(
         if (units.size == 1) launch {
             sceneContainer.changeTo({GameOverScene(score)})
         }
+    }
+
+    private var enemyRiderArchers by KorAtomicRef(listOf<RiderArcher>())
+    private fun Container.enemyRiderArcher(
+        initialPos: IPoint,
+        projectileCreator: Projectile.Creator,
+        characteristics: ArcherRiderCharacteristics = ArcherRiderCharacteristics.enemy(),
+    ): RiderArcher {
+        val view = enemyRiderArcherView(initialPos)
+        val i = enemyRiderArchers.size
+        return RiderArcher(
+            view,
+            UnitImpl(
+                view,
+                Anchor.CENTER.toPoint(),
+                characteristics.maxHealth,
+                characteristics.hitRadius,
+                healthObserver = { _, _, new, _ -> if (new < 0) remove(enemyRiderArchers[i]) }
+            ),
+            EnemyRiderArcherController(
+                playerPosProvider,
+                view,
+                characteristics.shootingDistance,
+                onReachCallback = { pos -> attack(pos, characteristics.strength) }
+            ),
+            projectileCreator,
+            characteristics.maxMovementPerSecond,
+            characteristics.speedAdditionPerSecond,
+            characteristics.speedReductionPerSecond,
+            characteristics.projectileMovementPerSecond,
+            characteristics.attackFrequency
+        ).also {
+            enemyRiderArchers += it
+            add(it)
+        }
+    }
+
+    private val enemyColors = listOf(Colors.RED, Colors.DARKRED, Colors.VIOLET, Colors.DARKVIOLET, Colors.BLUEVIOLET, Colors.CHOCOLATE)
+    private fun Container.enemyRiderArcherView(pos: IPoint) = solidRect(10, 10, enemyColors.random()) {
+        position(pos.x, pos.y)
+    }
+}
+
+data class ArcherRiderCharacteristics(
+    val maxHealth: Int,
+    val hitRadius: Double,
+    val strength: Int,
+    val shootingDistance: Double,
+    val maxMovementPerSecond: Double,
+    val speedAdditionPerSecond: Double,
+    val speedReductionPerSecond: Double,
+    val projectileMovementPerSecond: Double,
+    val attackFrequency: Frequency
+) {
+    companion object {
+        fun enemy() = ArcherRiderCharacteristics(
+            maxHealth = 20,
+            hitRadius = 15.0,
+            strength = 20,
+            shootingDistance = 50.0,
+            maxMovementPerSecond = 55.0,
+            speedAdditionPerSecond = 20.0,
+            speedReductionPerSecond = 15.0,
+            projectileMovementPerSecond = 100.0,
+            attackFrequency = 0.5.timesPerSecond
+        )
     }
 }
