@@ -19,6 +19,7 @@ import ui.*
 import units.*
 import units.rider.*
 import util.*
+import kotlin.random.*
 
 class GameScene(
     private val projectileManager: ProjectileManager = BaseProjectileManager(),
@@ -28,9 +29,10 @@ class GameScene(
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
     private lateinit var playerPosProvider: PosProvider
+    private lateinit var arrowsCreator: Projectile.Creator
 
 	override suspend fun SContainer.sceneMain() {
-        val arrowsCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
+        arrowsCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
         var playerHealthBar: HealthBarViewHolder? = null // todo fix nullability
         val playerView = container {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
@@ -71,12 +73,7 @@ class GameScene(
         }
 
         repeat(4) {
-            val xRange = (width / 4 * 1)..(width / 4 * 3)
-            val yRange = (height / 4 * 1)..(height / 4 * 3)
-            val sides = listOf(Point.Right, Point.Down)
-            val posOnEdge = sides.random() * Point(xRange.random(), yRange.random())
-            println(posOnEdge)
-            enemyRiderArcher(posOnEdge, arrowsCreator)
+            enemyRiderArcher(arrowsCreator)
         }
 
         start(this)
@@ -113,6 +110,10 @@ class GameScene(
 
     override fun removeUnit(unit: HittableUnit) {
         attackManager.removeUnit(unit)
+        root.enemyRiderArcher(arrowsCreator)
+        if (Random.nextDouble(0.0, 1.0) > .85) { // 15% chance to spawn new enemy
+            root.enemyRiderArcher(arrowsCreator)
+        }
         score += 1
         if (units.size == 1) launch {
             sceneContainer.changeTo({GameOverScene(score)})
@@ -121,8 +122,8 @@ class GameScene(
 
     private var enemyRiderArchers by KorAtomicRef(listOf<RiderArcher>())
     private fun Container.enemyRiderArcher(
-        initialPos: IPoint,
         projectileCreator: Projectile.Creator,
+        initialPos: IPoint = randomEnemyPos(),
         characteristics: ArcherRiderCharacteristics = ArcherRiderCharacteristics.enemy(),
     ): RiderArcher {
         val view = enemyRiderArcherView(initialPos)
@@ -157,6 +158,13 @@ class GameScene(
     private val enemyColors = listOf(Colors.RED, Colors.DARKRED, Colors.VIOLET, Colors.DARKVIOLET, Colors.BLUEVIOLET, Colors.CHOCOLATE)
     private fun Container.enemyRiderArcherView(pos: IPoint) = solidRect(10, 10, enemyColors.random()) {
         position(pos.x, pos.y)
+    }
+
+    private fun Container.randomEnemyPos(): IPoint {
+        val xRange = (width / 4 * 1)..(width / 4 * 3)
+        val yRange = (height / 4 * 1)..(height / 4 * 3)
+        val sides = listOf(Point.Right, Point.Down)
+        return sides.random() * Point(xRange.random(), yRange.random())
     }
 }
 
