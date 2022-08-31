@@ -6,7 +6,7 @@ import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
 import com.soywiz.korim.text.*
-import kotlin.system.*
+import exitFunction
 
 class MainMenuScene(private val score: Int? = null) : Scene() {
     override suspend fun SContainer.sceneMain() {
@@ -21,9 +21,11 @@ class MainMenuScene(private val score: Int? = null) : Scene() {
             uiButton(if (score == null) "Start game" else "Restart") {
                 onClick { sceneContainer.changeTo({ GameScene() }) }
             }
-            uiSpacing(height = 8.0)
-            uiButton("Exit") {
-                onClick { exitProcess(0) }
+            exitFunction?.let {
+                uiSpacing(height = 8.0)
+                uiButton("Exit") {
+                    onClick { exitFunction() }
+                }
             }
             centerOnStage()
         }

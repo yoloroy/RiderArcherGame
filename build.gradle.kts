@@ -6,18 +6,12 @@ plugins {
 
 korge {
 	id = "com.yoloroy.rider_archer_game"
-// To enable all targets at once
-
-	//targetAll()
-
-// To enable targets based on properties/environment variables
-	//targetDefault()
-
-// To selectively enable targets
+    version = "0.1"
+    exeBaseName = "rag"
+    name = "RiderArcherGame"
+    description = "Game about RiderArcher"
 
 	targetJvm()
-	//targetJs()
-	//targetDesktop()
-	//targetIos()
-	//targetAndroidIndirect() // targetAndroidDirect()
+	targetJs()
+	targetDesktop()
 }
