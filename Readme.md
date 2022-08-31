@@ -4,3 +4,6 @@ In this game you will play as horse rider with bow, you wil protect your sheeps 
 ## Current game state
 ![](readme/current_game_state.mov)
 
+
+## License
+[License](./LICENSE)
