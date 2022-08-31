@@ -54,7 +54,7 @@ class GameScene(
                 healthObserver = { _, _, new, max ->
                     playerHealthBar!!.update(new.toDouble() / max)
                     if (new < 0) launch {
-                        sceneContainer.changeTo({GameOverScene(score)})
+                        sceneContainer.changeTo({MainMenuScene(score)})
                     }
                 }
             ),
@@ -92,7 +92,7 @@ class GameScene(
     override fun start(mainView: View): Cancellable = with(mainView) {
         keys {
             down(Key.ESCAPE) {
-                sceneContainer.changeTo({MainMenuScene()})
+                sceneContainer.changeTo({MainMenuScene(score)})
             }
         }
 
@@ -116,7 +116,7 @@ class GameScene(
         }
         score += 1
         if (units.size == 1) launch {
-            sceneContainer.changeTo({GameOverScene(score)})
+            sceneContainer.changeTo({MainMenuScene(score)})
         }
     }
 

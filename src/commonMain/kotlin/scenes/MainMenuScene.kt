@@ -8,16 +8,17 @@ import com.soywiz.korim.color.*
 import com.soywiz.korim.text.*
 import kotlin.system.*
 
-class MainMenuScene : Scene() {
+class MainMenuScene(private val score: Int? = null) : Scene() {
     override suspend fun SContainer.sceneMain() {
         uiVerticalStack {
-            uiText("RiderArcherGame") {
+            val scoreRepresentation = score?.let { ", score: $it" } ?: ""
+            uiText("RiderArcherGame$scoreRepresentation") {
                 textColor = Colors.BLACK
                 textSize = 24.0
                 textAlignment = TextAlignment.CENTER
             }
             uiSpacing(height = 24.0)
-            uiButton("Start game") {
+            uiButton(if (score == null) "Start game" else "Restart") {
                 onClick { sceneContainer.changeTo({ GameScene() }) }
             }
             uiSpacing(height = 8.0)
