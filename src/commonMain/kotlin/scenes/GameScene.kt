@@ -28,8 +28,14 @@ class GameScene(
 
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
+    private val riderArcherSize = Size(10, 10)
     private lateinit var playerPosProvider: PosProvider
     private lateinit var arrowsCreator: Projectile.Creator
+
+    private val enemyFactoryCommonData = EnemyRiderArcherFactory.CommonData.Atomic
+    private val enemyFactory: RiderArcher.Factory<RiderArcher> by lazy {
+        EnemyRiderArcherFactory(enemyFactoryCommonData, arrowsCreator, riderArcherSize.p / 2, ::remove, ::attack)
+    }
 
 	override suspend fun SContainer.sceneMain() {
         arrowsCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
@@ -73,7 +79,7 @@ class GameScene(
         }
 
         repeat(4) {
-            enemyRiderArcher(arrowsCreator)
+            enemyRiderArcher()
         }
 
         start(this)
@@ -110,9 +116,9 @@ class GameScene(
 
     override fun removeUnit(unit: HittableUnit) {
         attackManager.removeUnit(unit)
-        root.enemyRiderArcher(arrowsCreator)
+        root.enemyRiderArcher()
         if (Random.nextDouble(0.0, 1.0) > .85) { // 15% chance to spawn new enemy
-            root.enemyRiderArcher(arrowsCreator)
+            root.enemyRiderArcher()
         }
         score += 1
         if (units.size == 1) launch {
@@ -120,39 +126,12 @@ class GameScene(
         }
     }
 
-    private var enemyRiderArchers by KorAtomicRef(listOf<RiderArcher>())
     private fun Container.enemyRiderArcher(
-        projectileCreator: Projectile.Creator,
         initialPos: IPoint = randomEnemyPos(),
-        characteristics: ArcherRiderCharacteristics = ArcherRiderCharacteristics.enemy(),
+        characteristics: RiderArcher.Data = LevelData.enemyCharacteristics,
     ): RiderArcher {
         val view = enemyRiderArcherView(initialPos)
-        val i = enemyRiderArchers.size
-        return RiderArcher(
-            view,
-            UnitImpl(
-                view,
-                Anchor.CENTER.toPoint(),
-                characteristics.maxHealth,
-                characteristics.hitRadius,
-                healthObserver = { _, _, new, _ -> if (new < 0) remove(enemyRiderArchers[i]) }
-            ),
-            EnemyRiderArcherController(
-                playerPosProvider,
-                view,
-                characteristics.shootingDistance,
-                onReachCallback = { pos -> attack(pos, characteristics.strength) }
-            ),
-            projectileCreator,
-            characteristics.maxMovementPerSecond,
-            characteristics.speedAdditionPerSecond,
-            characteristics.speedReductionPerSecond,
-            characteristics.projectileMovementPerSecond,
-            characteristics.attackFrequency
-        ).also {
-            enemyRiderArchers += it
-            add(it)
-        }
+        return enemyFactory.produce(view, characteristics).also(::add)
     }
 
     private val enemyColors = listOf(Colors.RED, Colors.DARKRED, Colors.VIOLET, Colors.DARKVIOLET, Colors.BLUEVIOLET, Colors.CHOCOLATE)
@@ -168,28 +147,16 @@ class GameScene(
     }
 }
 
-data class ArcherRiderCharacteristics(
-    val maxHealth: Int,
-    val hitRadius: Double,
-    val strength: Int,
-    val shootingDistance: Double,
-    val maxMovementPerSecond: Double,
-    val speedAdditionPerSecond: Double,
-    val speedReductionPerSecond: Double,
-    val projectileMovementPerSecond: Double,
-    val attackFrequency: Frequency
-) {
-    companion object {
-        fun enemy() = ArcherRiderCharacteristics(
-            maxHealth = 20,
-            hitRadius = 15.0,
-            strength = 20,
-            shootingDistance = 50.0,
-            maxMovementPerSecond = 55.0,
-            speedAdditionPerSecond = 20.0,
-            speedReductionPerSecond = 15.0,
-            projectileMovementPerSecond = 100.0,
-            attackFrequency = 0.5.timesPerSecond
-        )
-    }
+object LevelData {
+    val enemyCharacteristics = RiderArcher.Data(
+        maxHealth = 20,
+        hitRadius = 15.0,
+        strength = 20,
+        shootingDistance = 50.0,
+        maxMovementPerSecond = 55.0,
+        speedAdditionPerSecond = 20.0,
+        speedReductionPerSecond = 15.0,
+        projectileMovementPerSecond = 100.0,
+        attackFrequency = 0.5.timesPerSecond
+    )
 }

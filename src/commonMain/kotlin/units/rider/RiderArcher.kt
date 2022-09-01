@@ -49,4 +49,38 @@ class RiderArcher(
 
         fun onReach(destination: IPoint)
     }
+
+    class Constructor(
+        private val hittableUnitFactory: Factory<HittableUnit>,
+        private val controllerFactory: Factory<Controller>,
+        private val projectileCreatorFactory: Factory<Projectile.Creator>
+    ): Factory<RiderArcher> {
+        override fun produce(view: View, data: Data) = RiderArcher(
+            view,
+            hittableUnitFactory.produce(view, data),
+            controllerFactory.produce(view, data),
+            projectileCreatorFactory.produce(view, data),
+            data.maxMovementPerSecond,
+            data.speedAdditionPerSecond,
+            data.speedReductionPerSecond,
+            data.projectileMovementPerSecond,
+            data.attackFrequency,
+        )
+    }
+
+    data class Data(
+        val maxHealth: Int,
+        val hitRadius: Double,
+        val strength: Int,
+        val shootingDistance: Double,
+        val maxMovementPerSecond: Double,
+        val speedAdditionPerSecond: Double,
+        val speedReductionPerSecond: Double,
+        val projectileMovementPerSecond: Double,
+        val attackFrequency: Frequency
+    )
+
+    fun interface Factory<T> {
+        fun produce(view: View, data: Data): T
+    }
 }
