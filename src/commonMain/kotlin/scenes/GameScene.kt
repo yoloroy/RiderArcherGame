@@ -34,7 +34,14 @@ class GameScene(
 
     private val enemyFactoryCommonData = EnemyRiderArcherFactory.CommonData.Atomic
     private val enemyFactory: RiderArcher.Factory<RiderArcher> by lazy {
-        EnemyRiderArcherFactory(enemyFactoryCommonData, arrowsCreator, riderArcherSize.p / 2, ::remove, ::attack)
+        EnemyRiderArcherFactory(
+            enemyFactoryCommonData,
+            playerPosProvider,
+            arrowsCreator,
+            riderArcherSize.p / 2,
+            ::remove,
+            ::attack
+        )
     }
 
 	override suspend fun SContainer.sceneMain() {

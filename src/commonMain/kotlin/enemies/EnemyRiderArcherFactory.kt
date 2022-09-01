@@ -6,21 +6,21 @@ import com.soywiz.korma.geom.*
 import core.*
 import units.*
 import units.rider.*
-import util.*
 
 class EnemyRiderArcherFactory(
     private val commonData: CommonData,
-    @Suppress("unused") private val projectileCreator: Projectile.Creator,
+    private val targetPosProvider: PosProvider,
+    private val projectileCreator: Projectile.Creator,
     private val hitBoxOffset: IPoint,
     private val onDeath: (RiderArcher) -> Unit,
     private val onAttack: (IPoint, Int) -> Unit
 ) : RiderArcher.Factory<RiderArcher> {
 
-    override fun produce(view: View, data: RiderArcher.Data) = constructor.produce(view, data)
+    override fun produce(view: View, data: RiderArcher.Data) = constructor.produce(view, data).also { commonData.enemyRiderArchers += it }
 
     private val controllerFactory = RiderArcher.Factory<RiderArcher.Controller> { view: View, data: RiderArcher.Data ->
         EnemyRiderArcherController(
-            view.asPosProvider(Anchor.CENTER),
+            targetPosProvider,
             view,
             data.shootingDistance,
             onReachCallback = { destination -> onAttack(destination, data.strength) }
