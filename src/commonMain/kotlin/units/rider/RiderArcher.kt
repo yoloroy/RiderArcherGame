@@ -21,6 +21,8 @@ class RiderArcher(
     attackFrequency: Frequency
 ) : ManageableGameObject, HittableUnit by hittableUnit {
 
+    val currentMovementVectorPerSecond get() = horseRiding.movementVectorPerSecond
+
     // region components
     private val horseRiding = InertialMovingGameObject.Static(view, controller, maxMovementPerSecond, speedReductionPerSecond, speedAdditionPerSecond)
     private val shooting = ShootingComponent(view, attackFrequency, projectileMovementPerSecond, projectileCreator, controller)

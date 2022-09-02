@@ -1,9 +1,9 @@
 package core.gameobject
 
-import com.soywiz.klock.TimeSpan
-import com.soywiz.korge.view.View
+import com.soywiz.klock.*
+import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
-import util.coerceLengthIn
+import util.*
 
 abstract class InertialMovingGameObject(
     view: View,
@@ -13,8 +13,8 @@ abstract class InertialMovingGameObject(
     protected abstract val maxMovementPerSecond: Double
     protected abstract val speedAdditionPerSecond: Double
     protected abstract val speedReductionPerSecond: Double
-    private var movementVectorPerSecond: IPoint = Point(0)
-        set(value) {
+    var movementVectorPerSecond: IPoint = Point(0)
+        private set(value) {
             field = value.coerceLengthIn(0.0..maxMovementPerSecond)
         }
     private var hasMoved = false
@@ -32,9 +32,14 @@ abstract class InertialMovingGameObject(
     }
 
     override fun consumeEvent(dt: TimeSpan, event: Event) {
-        if (event is MoveEvent) {
-            movementVectorPerSecond += event.direction * speedAdditionPerSecond * dt.seconds
-            hasMoved = true
+        when (event) {
+            is MoveEvent -> {
+                movementVectorPerSecond += event.direction * speedAdditionPerSecond * dt.seconds
+                hasMoved = true
+            }
+            is StopEvent -> {
+                hasMoved = false
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import com.soywiz.korge.view.*
 import com.soywiz.korio.concurrent.atomic.*
 import com.soywiz.korma.geom.*
 import core.*
+import enemies.EnemyRiderArcherController.CurrentMovementPerSecondProvider
 import units.*
 import units.rider.*
 
@@ -23,6 +24,8 @@ class EnemyRiderArcherFactory(
             targetPosProvider,
             view,
             data.shootingDistance,
+            90.degrees,
+            MovementVectorProvider(commonData.nextId),
             onReachCallback = { destination -> onAttack(destination, data.strength) }
         )
     }
@@ -43,6 +46,10 @@ class EnemyRiderArcherFactory(
         override fun onChange(unit: UnitImpl, oldHealth: Int, newHealth: Int, maxHealth: Int) {
             if (newHealth < 0) onDeath(commonData.enemyRiderArchers[unitId])
         }
+    }
+
+    inner class MovementVectorProvider(private val unitId: Int) : CurrentMovementPerSecondProvider {
+        override fun vector() = commonData.enemyRiderArchers[unitId].currentMovementVectorPerSecond
     }
 
     interface CommonData {
