@@ -21,6 +21,10 @@ class MainMenuScene(private val score: Int? = null) : Scene() {
             uiButton(if (score == null) "Start game" else "Restart") {
                 onClick { sceneContainer.changeTo({ GameScene() }) }
             }
+            uiSpacing(height = 8.0)
+            uiButton("Change controls") {
+                onClick { sceneContainer.changeTo({ KeysSettingsScene() }) }
+            }
             exitFunction?.let {
                 uiSpacing(height = 8.0)
                 uiButton("Exit") {

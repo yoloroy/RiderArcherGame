@@ -1,5 +1,6 @@
 package scenes
 
+import SessionData.controls
 import com.soywiz.klock.*
 import com.soywiz.korev.*
 import com.soywiz.korge.input.*
@@ -72,7 +73,10 @@ class GameScene(
                 }
             ),
             PlayerRiderArcherController(
-                Key.W, Key.S, Key.A, Key.D,
+                controls.up,
+                controls.down,
+                controls.left,
+                controls.right,
                 onReachCallback = { pos -> attack(pos, playerStrength) }
             ).also { it.attach(this) },
             arrowsCreator,
