@@ -2,7 +2,7 @@ package util
 
 import com.soywiz.korge.view.*
 import com.soywiz.korma.geom.*
-import core.*
+import game.core.*
 
 val View.sizePoint get() = Point(width, height)
 
