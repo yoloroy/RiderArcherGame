@@ -11,23 +11,34 @@ import exitFunction
 
 class MainMenuScene(private val sessionData: SessionData, private var score: Int? = null) : Scene() {
 
+    private var maxScore: Int = score ?: 0
+
     override suspend fun SContainer.sceneInit() {
+        println("init start")
         score?.let { score ->
-            sessionData.saveScore(score)
-        } ?: run {
-            score = sessionData.loadScore()
+            val savedMaxScore = sessionData.loadScore()
+            maxScore = if (score > savedMaxScore) {
+                sessionData.saveScore(score)
+                score
+            } else {
+                savedMaxScore
+            }
         }
+        println("init end")
     }
 
     override suspend fun SContainer.sceneMain() {
+        println("main start")
         uiVerticalStack {
-            val scoreRepresentation = score?.let { ", score: $it" } ?: ""
-            uiText("RiderArcherGame$scoreRepresentation") {
+            val scoreRepresentation = score?.let { "\n  Score: $it" } ?: ""
+            val maxScoreRepresentation = "\n  Max score: $maxScore"
+            val title = "RiderArcherGame$maxScoreRepresentation$scoreRepresentation"
+            uiText(title) {
                 textColor = Colors.BLACK
                 textSize = 24.0
                 textAlignment = TextAlignment.CENTER
             }
-            uiSpacing(height = 24.0)
+            uiSpacing(height = 8.0 + 24 * (title.count { it == '\n' } + 1))
             uiButton(if (score == null) "Start game" else "Restart") {
                 onClick { sceneContainer.changeTo({ GameScene(sessionData) }) }
             }
