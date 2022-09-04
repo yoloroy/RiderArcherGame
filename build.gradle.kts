@@ -19,4 +19,6 @@ korge {
 	targetJvm()
 	targetJs()
 	targetDesktop()
+
+    supportBox2d()
 }
