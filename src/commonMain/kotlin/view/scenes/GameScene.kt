@@ -1,6 +1,7 @@
 package view.scenes
 
-import SessionData.controls
+import Controls
+import SessionData
 import com.soywiz.klock.*
 import com.soywiz.korev.*
 import com.soywiz.korge.input.*
@@ -23,6 +24,7 @@ import view.implementations.projectiles.*
 import kotlin.random.*
 
 class GameScene(
+    private val sessionData: SessionData,
     private val projectileManager: ProjectileManager = BaseProjectileManager(),
     private val attackManager: AttackManager = AttackManager.Base()
 ) : Scene(), GameObjectManager, AttackManager by attackManager {
@@ -43,6 +45,12 @@ class GameScene(
             ::remove,
             ::attack
         )
+    }
+
+    private lateinit var controls: Controls
+
+    override suspend fun SContainer.sceneInit() {
+        controls = sessionData.loadControls()
     }
 
 	override suspend fun SContainer.sceneMain() {
@@ -68,7 +76,7 @@ class GameScene(
                 healthObserver = { _, _, new, max ->
                     playerHealthBar!!.update(new.toDouble() / max)
                     if (new < 0) launch {
-                        sceneContainer.changeTo({MainMenuScene(score)})
+                        sceneContainer.changeTo({MainMenuScene(sessionData, score)})
                     }
                 }
             ),
@@ -109,7 +117,7 @@ class GameScene(
     override fun start(mainView: View): Cancellable = with(mainView) {
         keys {
             down(Key.ESCAPE) {
-                sceneContainer.changeTo({MainMenuScene(score)})
+                goToMainMenu()
             }
         }
 
@@ -133,7 +141,7 @@ class GameScene(
         }
         score += 1
         if (units.size == 1) launch {
-            sceneContainer.changeTo({MainMenuScene(score)})
+            goToMainMenu()
         }
     }
 
@@ -156,6 +164,8 @@ class GameScene(
         val sides = listOf(Point.Right, Point.Down)
         return sides.random() * Point(xRange.random(), yRange.random())
     }
+
+    private suspend fun goToMainMenu() = sceneContainer.changeTo({MainMenuScene(sessionData, score)})
 }
 
 object LevelData {
