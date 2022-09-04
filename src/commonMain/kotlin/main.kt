@@ -6,6 +6,6 @@ import view.scenes.*
 
 suspend fun main() = Korge(width = 512, height = 512, bgcolor = Colors.WHEAT) {
     val sceneContainer = sceneContainer()
-    val sessionData = SessionData(ControlsDaoKorgeImpl())
+    val sessionData = SessionData(ControlsDaoKorgeImpl(), ScoreDaoKorgeImpl())
     sceneContainer.changeTo({ MainMenuScene(sessionData) })
 }

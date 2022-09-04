@@ -13,18 +13,19 @@ class ControlsDaoKorgeImpl : ControlsDao {
     private var controls by KorAtomicRef(Controls(Key.W, Key.S, Key.A, Key.D))
     private var isChanged by KorAtomicBoolean(true)
     private val mutex = Mutex()
+    private val controlsFile get() = resourcesVfs["controls.json"]
 
     override suspend fun saveControls(controls: Controls) {
         isChanged = true
         mutex.withLock {
-            resourcesVfs["controls.json"].writeString(controls.toMap().toJson())
+            controlsFile.writeString(controls.toMap().toJson())
         }
     }
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun loadControls(): Controls {
         return if (isChanged) mutex.withLock {
-            val controlsString = resourcesVfs["controls.json"].readString()
+            val controlsString = controlsFile.readString()
             val controlsMap = Json.parse(controlsString) as Map<String, String>
             Controls.fromMap(controlsMap).also {
                 controls = it

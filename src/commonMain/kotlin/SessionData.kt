@@ -1,8 +1,17 @@
 import com.soywiz.korev.*
 
 class SessionData(
-    private val controlsDAO: ControlsDao
-) : ControlsDao by controlsDAO
+    controlsDao: ControlsDao,
+    scoreDao: ScoreDao
+) : ControlsDao by controlsDao,
+    ScoreDao by scoreDao
+
+interface ScoreDao {
+
+    suspend fun saveScore(score: Int)
+
+    suspend fun loadScore(): Int
+}
 
 interface ControlsDao {
 

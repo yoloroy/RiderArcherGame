@@ -9,7 +9,16 @@ import com.soywiz.korim.color.*
 import com.soywiz.korim.text.*
 import exitFunction
 
-class MainMenuScene(private val sessionData: SessionData, private val score: Int? = null) : Scene() {
+class MainMenuScene(private val sessionData: SessionData, private var score: Int? = null) : Scene() {
+
+    override suspend fun SContainer.sceneInit() {
+        score?.let { score ->
+            sessionData.saveScore(score)
+        } ?: run {
+            score = sessionData.loadScore()
+        }
+    }
+
     override suspend fun SContainer.sceneMain() {
         uiVerticalStack {
             val scoreRepresentation = score?.let { ", score: $it" } ?: ""
