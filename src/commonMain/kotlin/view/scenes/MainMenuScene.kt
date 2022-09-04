@@ -14,7 +14,6 @@ class MainMenuScene(private val sessionData: SessionData, private var score: Int
     private var maxScore: Int = score ?: 0
 
     override suspend fun SContainer.sceneInit() {
-        println("init start")
         score?.let { score ->
             val savedMaxScore = sessionData.loadScore()
             maxScore = if (score > savedMaxScore) {
@@ -24,11 +23,9 @@ class MainMenuScene(private val sessionData: SessionData, private var score: Int
                 savedMaxScore
             }
         }
-        println("init end")
     }
 
     override suspend fun SContainer.sceneMain() {
-        println("main start")
         uiVerticalStack {
             val scoreRepresentation = score?.let { "\n  Score: $it" } ?: ""
             val maxScoreRepresentation = "\n  Max score: $maxScore"

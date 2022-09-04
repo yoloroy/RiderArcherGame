@@ -8,8 +8,11 @@ import com.soywiz.korge.box2d.*
 import com.soywiz.korge.input.*
 import com.soywiz.korge.scene.*
 import com.soywiz.korge.view.*
+import com.soywiz.korim.bitmap.*
 import com.soywiz.korim.color.*
+import com.soywiz.korim.format.*
 import com.soywiz.korio.concurrent.atomic.*
+import com.soywiz.korio.file.std.*
 import com.soywiz.korio.lang.*
 import com.soywiz.korma.geom.*
 import game.core.*
@@ -53,8 +56,27 @@ class GameScene(
 
     private lateinit var controls: Controls
 
+    private lateinit var riderArcherBitmap: Bitmap
+    private lateinit var enemyRiderArchersBitmaps: List<Bitmap>
+
     override suspend fun SContainer.sceneInit() {
         controls = sessionData.loadControls()
+
+        riderArcherBitmap = resourcesVfs["riderArcher.png"].readBitmap()
+            .resized(20, 20, ScaleMode.FILL, Anchor.TOP_LEFT)
+
+        // TODO refactor
+        val enemyRiderArchersColors = listOf(Colors.RED, Colors.DARKRED, Colors.VIOLET, Colors.DARKVIOLET, Colors.BLUEVIOLET, Colors.CHOCOLATE)
+        enemyRiderArchersBitmaps = enemyRiderArchersColors
+            .map { newColor ->
+                riderArcherBitmap.clone().apply {
+                    forEach { _, x, y ->
+                        val color = getRgba(x, y)
+                        setRgba(x, y, newColor.withA(color.a))
+                    }
+                }
+            }
+
     }
 
 	override suspend fun SContainer.sceneMain() {
@@ -68,8 +90,11 @@ class GameScene(
         val playerView = container {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
 
-            solidRect(10, 10, Colors.BLACK) { position(1.0, 8.0) } // archer with horse will be here
-            playerHealthBar = healthBar(10.0, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
+            image(riderArcherBitmap) {
+                size(20, 20)
+                position(1.0, 8.0)
+            }
+            playerHealthBar = healthBar(20.0, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
         }.registerBodyWithFixture(
             type = BodyType.DYNAMIC,
             shape = CircleShape(8),
@@ -166,13 +191,13 @@ class GameScene(
         return enemyFactory.produce(view, characteristics).also(::add)
     }
 
-    private val enemyColors = listOf(Colors.RED, Colors.DARKRED, Colors.VIOLET, Colors.DARKVIOLET, Colors.BLUEVIOLET, Colors.CHOCOLATE)
-    private fun Container.enemyRiderArcherView(pos: IPoint): SolidRect {
-        return solidRect(10, 10, enemyColors.random()) {
+    private fun Container.enemyRiderArcherView(pos: IPoint): View {
+        return image(enemyRiderArchersBitmaps.random()) {
+            size(20, 20)
             position(pos.x, pos.y)
         }.registerBodyWithFixture(
             type = BodyType.DYNAMIC,
-            shape = CircleShape(8),
+            shape = CircleShape(28),
             density = 1f
         )
     }
