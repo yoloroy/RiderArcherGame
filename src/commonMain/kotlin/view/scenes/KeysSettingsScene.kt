@@ -11,7 +11,10 @@ import com.soywiz.korim.color.*
 import com.soywiz.korim.text.*
 import com.soywiz.korio.async.*
 
-class KeysSettingsScene(private val sessionData: SessionData) : Scene() {
+class KeysSettingsScene(
+    private val sessionData: SessionData,
+    returnToMenu: ReturnToMenu
+) : Scene(), ReturnToMenu by returnToMenu {
 
     private lateinit var controls: Controls
 
@@ -52,7 +55,7 @@ class KeysSettingsScene(private val sessionData: SessionData) : Scene() {
             }
             uiSpacing(height = 8.0)
             uiButton("Return") {
-                onClick { goToMainMenu() }
+                onClick { sceneContainer.launchReturnToMenu() }
             }
             centerOnStage()
         }
@@ -67,8 +70,6 @@ class KeysSettingsScene(private val sessionData: SessionData) : Scene() {
             }
         }
     }
-
-    private suspend fun goToMainMenu() = sceneContainer.changeTo({MainMenuScene(sessionData)})
 
     private fun updateControls(newControls: Controls) {
         controls = newControls

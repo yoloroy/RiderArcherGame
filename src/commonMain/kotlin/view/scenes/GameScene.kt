@@ -19,7 +19,6 @@ import game.core.*
 import game.core.GameObjectManager.ManageableGameObject
 import game.units.*
 import game.units.rider.*
-import kotlinx.coroutines.*
 import org.jbox2d.collision.shapes.*
 import org.jbox2d.common.*
 import org.jbox2d.dynamics.*
@@ -32,9 +31,13 @@ import kotlin.random.*
 
 class GameScene(
     private val sessionData: SessionData,
+    returnToMenu: ReturnToMenu,
     private val projectileManager: ProjectileManager = BaseProjectileManager(),
     private val attackManager: AttackManager = AttackManager.Base()
-) : Scene(), GameObjectManager, AttackManager by attackManager {
+) : Scene(),
+    GameObjectManager,
+    AttackManager by attackManager,
+    ReturnToMenu by returnToMenu {
 
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
@@ -76,7 +79,6 @@ class GameScene(
                     }
                 }
             }
-
     }
 
 	override suspend fun SContainer.sceneMain() {
@@ -113,9 +115,7 @@ class GameScene(
                 10.0,
                 healthObserver = { _, _, new, max ->
                     playerHealthBar!!.update(new.toDouble() / max)
-                    if (new < 0) launch {
-                        sceneContainer.changeTo({MainMenuScene(sessionData, score)})
-                    }
+                    if (new < 0) sceneContainer.launchReturnToMenu(score)
                 }
             ),
             PlayerRiderArcherController(
@@ -155,7 +155,7 @@ class GameScene(
     override fun start(mainView: View): Cancellable = with(mainView) {
         keys {
             down(Key.ESCAPE) {
-                goToMainMenu()
+                sceneContainer.launchReturnToMenu(score)
             }
         }
 
@@ -178,9 +178,7 @@ class GameScene(
             sceneView.enemyRiderArcher()
         }
         score += 1
-        if (units.size == 1) launch {
-            goToMainMenu()
-        }
+        if (units.size == 1) sceneContainer.launchReturnToMenu(score)
     }
 
     private fun Container.enemyRiderArcher(
@@ -208,8 +206,6 @@ class GameScene(
         val sides = listOf(Point.Right, Point.Down)
         return sides.random() * Point(xRange.random(), yRange.random())
     }
-
-    private suspend fun goToMainMenu() = sceneContainer.changeTo({MainMenuScene(sessionData, score)})
 }
 
 object LevelData {

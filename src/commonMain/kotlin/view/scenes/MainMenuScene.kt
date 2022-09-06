@@ -7,9 +7,11 @@ import com.soywiz.korge.ui.*
 import com.soywiz.korge.view.*
 import com.soywiz.korim.color.*
 import com.soywiz.korim.text.*
+import com.soywiz.korio.async.launch
 import exitFunction
+import kotlinx.coroutines.*
 
-class MainMenuScene(private val sessionData: SessionData, private var score: Int? = null) : Scene() {
+class MainMenuScene(private val sessionData: SessionData, private var score: Int? = null) : Scene(), ReturnToMenu {
 
     private var maxScore: Int = score ?: 0
 
@@ -37,11 +39,11 @@ class MainMenuScene(private val sessionData: SessionData, private var score: Int
             }
             uiSpacing(height = 8.0 + 24 * (title.count { it == '\n' } + 1))
             uiButton(if (score == null) "Start game" else "Restart") {
-                onClick { sceneContainer.changeTo({ GameScene(sessionData) }) }
+                onClick { sceneContainer.changeTo({ GameScene(sessionData, this@MainMenuScene) }) }
             }
             uiSpacing(height = 8.0)
             uiButton("Change controls") {
-                onClick { sceneContainer.changeTo({ KeysSettingsScene(sessionData) }) }
+                onClick { sceneContainer.changeTo({ KeysSettingsScene(sessionData, this@MainMenuScene) }) }
             }
             exitFunction?.let {
                 uiSpacing(height = 8.0)
@@ -52,4 +54,15 @@ class MainMenuScene(private val sessionData: SessionData, private var score: Int
             centerOnStage()
         }
     }
+
+    override fun launchReturnToMenu(sceneContainer: SceneContainer, score: Int?) = sceneContainer.launch {
+        sceneContainer.changeTo({ MainMenuScene(sessionData, score) })
+    }
+}
+
+fun interface ReturnToMenu {
+
+    fun launchReturnToMenu(sceneContainer: SceneContainer, score: Int?): Job
+
+    fun SceneContainer.launchReturnToMenu(score: Int? = null) = launchReturnToMenu(this, score)
 }
