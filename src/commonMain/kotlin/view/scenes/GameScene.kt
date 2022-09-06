@@ -41,7 +41,7 @@ class GameScene(
 
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
-    private val riderArcherSize = Size(10, 10)
+    private val riderArcherSize = Size(20, 20)
     private lateinit var playerPosProvider: PosProvider
     private lateinit var arrowsCreator: Projectile.Creator
 
@@ -66,7 +66,7 @@ class GameScene(
         controls = sessionData.loadControls()
 
         riderArcherBitmap = resourcesVfs["riderArcher.png"].readBitmap()
-            .resized(20, 20, ScaleMode.FILL, Anchor.TOP_LEFT)
+            .resized(riderArcherSize.width.toInt(), riderArcherSize.height.toInt(), ScaleMode.FILL, Anchor.TOP_LEFT)
 
         // TODO refactor
         val enemyRiderArchersColors = listOf(Colors.RED, Colors.DARKRED, Colors.VIOLET, Colors.DARKVIOLET, Colors.BLUEVIOLET, Colors.CHOCOLATE)
@@ -93,10 +93,10 @@ class GameScene(
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
 
             image(riderArcherBitmap) {
-                size(20, 20)
+                size(riderArcherSize.width, riderArcherSize.height)
                 position(1.0, 8.0)
             }
-            playerHealthBar = healthBar(20.0, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
+            playerHealthBar = healthBar(riderArcherSize.width, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
         }.registerBodyWithFixture(
             type = BodyType.DYNAMIC,
             shape = CircleShape(8),
@@ -191,11 +191,11 @@ class GameScene(
 
     private fun Container.enemyRiderArcherView(pos: IPoint): View {
         return image(enemyRiderArchersBitmaps.random()) {
-            size(20, 20)
+            size(riderArcherSize.width, riderArcherSize.height)
             position(pos.x, pos.y)
         }.registerBodyWithFixture(
             type = BodyType.DYNAMIC,
-            shape = CircleShape(28),
+            shape = CircleShape(riderArcherSize.p.length + 2),
             density = 1f
         )
     }
