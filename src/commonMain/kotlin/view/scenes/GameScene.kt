@@ -112,7 +112,7 @@ class GameScene(
                 playerView,
                 playerView.sizePoint / 2,
                 100,
-                10.0,
+                15.0,
                 healthObserver = { _, _, new, max ->
                     playerHealthBar!!.update(new.toDouble() / max)
                     if (new < 0) sceneContainer.launchReturnToMenu(score)
@@ -126,10 +126,10 @@ class GameScene(
                 onReachCallback = { pos -> attack(pos, playerStrength) }
             ).also { it.attach(this) },
             arrowsCreator,
-            maxMovementPerSecond = 80.0,
+            maxMovementPerSecond = 65.0,
             speedAdditionPerSecond = 30.0,
             speedReductionPerSecond = 50.0,
-            projectileMovementPerSecond = 140.0,
+            projectileMovementPerSecond = 150.0,
             attackFrequency = 1.timesPerSecond
         ).also {
             add(it)
@@ -213,11 +213,11 @@ object LevelData {
         maxHealth = 20,
         hitRadius = 15.0,
         strength = 20,
-        shootingDistance = 50.0,
+        shootingDistance = 75.0,
         maxMovementPerSecond = 55.0,
-        speedAdditionPerSecond = 20.0,
-        speedReductionPerSecond = 30.0,
-        projectileMovementPerSecond = 100.0,
+        speedAdditionPerSecond = 25.0,
+        speedReductionPerSecond = 45.0,
+        projectileMovementPerSecond = 150.0,
         attackFrequency = 0.5.timesPerSecond
     )
 }
