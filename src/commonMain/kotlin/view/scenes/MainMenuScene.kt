@@ -55,14 +55,14 @@ class MainMenuScene(private val sessionData: SessionData, private var score: Int
         }
     }
 
-    override fun launchReturnToMenu(sceneContainer: SceneContainer, score: Int?) = sceneContainer.launch {
-        sceneContainer.changeTo({ MainMenuScene(sessionData, score) })
+    override fun SceneContainer.launchReturnToMenu(score: Int?) = launch {
+        changeTo({ MainMenuScene(sessionData, score) })
     }
 }
 
 fun interface ReturnToMenu {
 
-    fun launchReturnToMenu(sceneContainer: SceneContainer, score: Int?): Job
+    fun SceneContainer.launchReturnToMenu(score: Int?): Job
 
-    fun SceneContainer.launchReturnToMenu(score: Int? = null) = launchReturnToMenu(this, score)
+    fun SceneContainer.launchReturnToMenu(): Job = launchReturnToMenu(null)
 }
