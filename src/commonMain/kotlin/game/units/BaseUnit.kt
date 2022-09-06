@@ -1,4 +1,4 @@
-package game.units.rider
+package game.units
 
 import com.soywiz.klock.*
 import com.soywiz.korge.view.*
@@ -7,9 +7,8 @@ import game.core.*
 import game.core.GameObjectManager.ManageableGameObject
 import game.core.gameobject.*
 import game.core.gameobject.EventsBasedGameObject.EventsProvider
-import game.units.*
 
-class RiderArcher(
+class BaseUnit(
     private val view: View,
     hittableUnit: HittableUnit,
     controller: Controller,
@@ -56,8 +55,8 @@ class RiderArcher(
         private val hittableUnitFactory: Factory<HittableUnit>,
         private val controllerFactory: Factory<Controller>,
         private val projectileCreatorFactory: Factory<Projectile.Creator>
-    ): Factory<RiderArcher> {
-        override fun produce(view: View, data: Data) = RiderArcher(
+    ): Factory<BaseUnit> {
+        override fun produce(view: View, data: Data) = BaseUnit(
             view,
             hittableUnitFactory.produce(view, data),
             controllerFactory.produce(view, data),

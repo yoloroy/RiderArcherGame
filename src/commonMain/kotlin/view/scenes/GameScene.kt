@@ -18,7 +18,6 @@ import com.soywiz.korma.geom.*
 import game.core.*
 import game.core.GameObjectManager.ManageableGameObject
 import game.units.*
-import game.units.rider.*
 import org.jbox2d.collision.shapes.*
 import org.jbox2d.common.*
 import org.jbox2d.dynamics.*
@@ -46,7 +45,7 @@ class GameScene(
     private lateinit var arrowsCreator: Projectile.Creator
 
     private val enemyFactoryCommonData = EnemyRiderArcherFactory.CommonData.Atomic
-    private val enemyFactory: RiderArcher.Factory<RiderArcher> by lazy {
+    private val enemyFactory: BaseUnit.Factory<BaseUnit> by lazy {
         EnemyRiderArcherFactory(
             enemyFactoryCommonData,
             playerPosProvider,
@@ -106,7 +105,7 @@ class GameScene(
 
         val playerStrength = 20
 
-        RiderArcher(
+        BaseUnit(
             playerView,
             UnitImpl(
                 playerView,
@@ -183,8 +182,8 @@ class GameScene(
 
     private fun Container.enemyRiderArcher(
         initialPos: IPoint = randomEnemyPos(),
-        characteristics: RiderArcher.Data = LevelData.enemyCharacteristics,
-    ): RiderArcher {
+        characteristics: BaseUnit.Data = LevelData.enemyCharacteristics,
+    ): BaseUnit {
         val view = enemyRiderArcherView(initialPos)
         return enemyFactory.produce(view, characteristics).also(::add)
     }
@@ -209,7 +208,7 @@ class GameScene(
 }
 
 object LevelData {
-    val enemyCharacteristics = RiderArcher.Data(
+    val enemyCharacteristics = BaseUnit.Data(
         maxHealth = 20,
         hitRadius = 15.0,
         strength = 20,

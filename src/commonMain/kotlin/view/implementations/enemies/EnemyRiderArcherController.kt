@@ -6,7 +6,7 @@ import game.core.*
 import game.core.gameobject.*
 import game.core.gameobject.EventsBasedGameObject.Event
 import game.core.gameobject.WarriorGameObject.AttackEvent
-import game.units.rider.*
+import game.units.*
 
 class EnemyRiderArcherController(
     private val targetPosProvider: PosProvider,
@@ -15,7 +15,7 @@ class EnemyRiderArcherController(
     private val vectorAngleDifferenceToStop: Angle,
     private val currentMovement: CurrentMovementPerSecondProvider,
     private val onReachCallback: (destination: IPoint) -> Unit = {}
-) : RiderArcher.Controller {
+) : BaseUnit.Controller {
 
     override val shootPos: IPoint get() = targetPosProvider.pos()
 

@@ -5,7 +5,6 @@ import com.soywiz.korio.concurrent.atomic.*
 import com.soywiz.korma.geom.*
 import game.core.*
 import game.units.*
-import game.units.rider.*
 import view.implementations.enemies.EnemyRiderArcherController.CurrentMovementPerSecondProvider
 
 class EnemyRiderArcherFactory(
@@ -13,13 +12,13 @@ class EnemyRiderArcherFactory(
     private val targetPosProvider: PosProvider,
     private val projectileCreator: Projectile.Creator,
     private val hitBoxOffset: IPoint,
-    private val onDeath: (RiderArcher) -> Unit,
+    private val onDeath: (BaseUnit) -> Unit,
     private val onAttack: (IPoint, Int) -> Unit
-) : RiderArcher.Factory<RiderArcher> {
+) : BaseUnit.Factory<BaseUnit> {
 
-    override fun produce(view: View, data: RiderArcher.Data) = constructor.produce(view, data).also { commonData.enemyRiderArchers += it }
+    override fun produce(view: View, data: BaseUnit.Data) = constructor.produce(view, data).also { commonData.enemyRiderArchers += it }
 
-    private val controllerFactory = RiderArcher.Factory<RiderArcher.Controller> { view: View, data: RiderArcher.Data ->
+    private val controllerFactory = BaseUnit.Factory<BaseUnit.Controller> { view: View, data: BaseUnit.Data ->
         EnemyRiderArcherController(
             targetPosProvider,
             view,
@@ -30,7 +29,7 @@ class EnemyRiderArcherFactory(
         )
     }
 
-    private val hittableUnitFactory = RiderArcher.Factory<HittableUnit> { view: View, data: RiderArcher.Data ->
+    private val hittableUnitFactory = BaseUnit.Factory<HittableUnit> { view: View, data: BaseUnit.Data ->
         UnitImpl(
             view,
             hitBoxOffset,
@@ -40,7 +39,7 @@ class EnemyRiderArcherFactory(
         )
     }
 
-    private val constructor = RiderArcher.Constructor(hittableUnitFactory, controllerFactory) { _, _ -> projectileCreator }
+    private val constructor = BaseUnit.Constructor(hittableUnitFactory, controllerFactory) { _, _ -> projectileCreator }
 
     inner class HealthObserver(private val unitId: Int) : UnitImpl.HealthObserver {
         override fun onChange(unit: UnitImpl, oldHealth: Int, newHealth: Int, maxHealth: Int) {
@@ -53,12 +52,12 @@ class EnemyRiderArcherFactory(
     }
 
     interface CommonData {
-        var enemyRiderArchers: List<RiderArcher>
+        var enemyRiderArchers: List<BaseUnit>
 
-        class Base(override var enemyRiderArchers: List<RiderArcher> = emptyList()) : CommonData
+        class Base(override var enemyRiderArchers: List<BaseUnit> = emptyList()) : CommonData
 
         object Atomic : CommonData {
-            override var enemyRiderArchers by KorAtomicRef(emptyList<RiderArcher>())
+            override var enemyRiderArchers by KorAtomicRef(emptyList<BaseUnit>())
         }
     }
 

@@ -7,7 +7,7 @@ import com.soywiz.korma.geom.*
 import game.core.gameobject.*
 import game.core.gameobject.EventsBasedGameObject.Event
 import game.core.gameobject.WarriorGameObject.AttackEvent
-import game.units.rider.*
+import game.units.*
 
 class PlayerRiderArcherController(
     private val upKey: Key,
@@ -15,7 +15,7 @@ class PlayerRiderArcherController(
     private val leftKey: Key,
     private val rightKey: Key,
     private val onReachCallback: (destination: IPoint) -> Unit = {}
-) : RiderArcher.Controller {
+) : BaseUnit.Controller {
 
     private var up = false
     private var down = false
