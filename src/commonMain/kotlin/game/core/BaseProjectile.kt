@@ -7,21 +7,28 @@ import com.soywiz.korio.async.*
 import com.soywiz.korma.geom.*
 import game.core.ProjectileManager.ManageableProjectile
 import kotlinx.coroutines.*
+import kotlin.properties.*
 
 open class BaseProjectile(
-    private val view: View,
+    protected val view: View,
     private val container: Container,
     private val onReachCallback: (destination: IPoint) -> Unit,
     private val manager: ProjectileManager
 ) : ManageableProjectile {
 
-    private lateinit var start: IPoint
-    private lateinit var destination: IPoint
+    protected lateinit var start: IPoint
+        private set
+    protected lateinit var destination: IPoint
+        private set
+    protected val fullDistance: Double get() = start.distanceTo(destination)
     private lateinit var speedVectorPerSecond: IPoint
+    protected var speedPerSecond by Delegates.notNull<Double>()
+        private set
 
     override fun launch(start: IPoint, destination: IPoint, speedPerSecond: Double) {
         this.start = start.copy()
         this.destination = destination.copy()
+        this.speedPerSecond = speedPerSecond
         this.speedVectorPerSecond = (destination - start).unit * speedPerSecond
         launchImmediately(Dispatchers.Default) {
             view.pos = start
