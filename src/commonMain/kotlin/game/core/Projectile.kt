@@ -6,10 +6,14 @@ interface Projectile {
 
     fun launch(start: IPoint, destination: IPoint, speedPerSecond: Double)
 
-    interface Creator {
+    abstract class Creator {
 
-        fun onReach(block: (destination: IPoint) -> Unit): Creator
+        protected val onReachCallbacks = mutableListOf<(destination: IPoint) -> Unit>()
 
-        fun create(): Projectile
+        fun onReach(block: (destination: IPoint) -> Unit) = apply {
+            onReachCallbacks += block
+        }
+
+        abstract fun create(): Projectile
     }
 }

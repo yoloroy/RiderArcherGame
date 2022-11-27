@@ -49,14 +49,13 @@ class ArrowProjectile(
         private val container: Container,
         private val color: RGBA = Colors.RED,
         private val manager: ProjectileManager
-    ) : Projectile.Creator {
+    ) : Projectile.Creator() {
 
-        private var onReachCallback: (destination: IPoint) -> Unit = {}
-        override fun onReach(block: (destination: IPoint) -> Unit) = apply {
-            onReachCallback = block
+        override fun create() = ArrowProjectile(container, manager, color) {
+            for (callback in onReachCallbacks) {
+                callback(it)
+            }
         }
-
-        override fun create() = ArrowProjectile(container, manager, color, onReachCallback)
     }
 }
 
