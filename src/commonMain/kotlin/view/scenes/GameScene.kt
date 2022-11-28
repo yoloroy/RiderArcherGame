@@ -11,7 +11,9 @@ import com.soywiz.korge.view.*
 import com.soywiz.korim.bitmap.*
 import com.soywiz.korim.color.*
 import com.soywiz.korim.format.*
+import com.soywiz.korio.async.*
 import com.soywiz.korio.concurrent.atomic.*
+import com.soywiz.korio.file.*
 import com.soywiz.korio.file.std.*
 import com.soywiz.korio.lang.*
 import com.soywiz.korma.geom.*
@@ -40,7 +42,9 @@ class GameScene(
 
     private var gameObjects by KorAtomicRef(emptySet<GameObject>())
     private var score = 0
-    private val riderArcherSize = Size(20, 20)
+    private val riderArcherSize = Size(25, 25)
+    private val arrowReachSpriteSize = Size(20, 20)
+    private val arrowReachingFrameDuration = 0.2.seconds
     private lateinit var playerPosProvider: PosProvider
     private lateinit var arrowsCreator: Projectile.Creator
 
@@ -60,9 +64,22 @@ class GameScene(
 
     private lateinit var riderArcherBitmap: Bitmap
     private lateinit var enemyRiderArchersBitmaps: List<Bitmap>
+    private lateinit var arrowReachingBitmaps: List<Bitmap>
 
     override suspend fun SContainer.sceneInit() {
         controls = sessionData.loadControls()
+
+        arrowReachingBitmaps = resourcesVfs["arrow_reach_frames"].listSimple()
+            .filter { it.baseName.matches("\\d*.png".toRegex()) }
+            .sortedBy { it.baseName }
+            .map {
+                it.readBitmap().resized(
+                    arrowReachSpriteSize.width.toInt(),
+                    arrowReachSpriteSize.height.toInt(),
+                    ScaleMode.FILL,
+                    Anchor.CENTER
+                )
+            }
 
         riderArcherBitmap = resourcesVfs["riderArcher.png"].readBitmap()
             .resized(riderArcherSize.width.toInt(), riderArcherSize.height.toInt(), ScaleMode.FILL, Anchor.TOP_LEFT)
@@ -86,7 +103,22 @@ class GameScene(
             customScale = 1.0
         }
 
-        arrowsCreator = ArrowProjectile.Creator(this, Colors.BLACK, manager = projectileManager)
+        arrowsCreator = ArrowProjectile
+            .Creator(this, Colors.BLACK, manager = projectileManager)
+            .onReach { destination ->
+                val reachingImg = image(arrowReachingBitmaps.first()) {
+                    position(destination)
+                }
+                launch {
+                    for (frame in arrowReachingBitmaps.drop(1)) {
+                        delay(arrowReachingFrameDuration)
+                        reachingImg.bitmap = frame.slice()
+                    }
+                    delay(arrowReachingFrameDuration)
+                    reachingImg.removeFromParent()
+                }
+            }
+
         var playerHealthBar: HealthBarViewHolder? = null // todo fix nullability
         val playerView = container {
             position(this@sceneMain.width / 2, this@sceneMain.height / 2)
