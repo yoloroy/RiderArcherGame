@@ -7,8 +7,8 @@ plugins {
 korge {
 	id = "com.yoloroy.rider_archer_game"
     icon = project.file("src/commonMain/resources/riderArcher.png")
-    versionCode = 2
-    version = "0.2"
+    versionCode = 3
+    version = "0.3"
     exeBaseName = "rag"
     name = "RiderArcherGame"
     title = name
