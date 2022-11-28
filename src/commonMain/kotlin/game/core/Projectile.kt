@@ -8,7 +8,7 @@ interface Projectile {
 
     abstract class Creator {
 
-        protected val onReachCallbacks = mutableListOf<(destination: IPoint) -> Unit>()
+        protected var onReachCallbacks = listOf<(destination: IPoint) -> Unit>()
 
         fun onReach(block: (destination: IPoint) -> Unit) = apply {
             onReachCallbacks += block

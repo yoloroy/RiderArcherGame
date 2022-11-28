@@ -31,7 +31,6 @@ class ArrowProjectile(
 
     override fun launch(start: IPoint, destination: IPoint, speedPerSecond: Double) {
         super.launch(start, destination, speedPerSecond)
-        println("launch from $start to $destination")
         canopyShootingMath = ArrowCanopyShootingMath.forLaunch(G, fullDistance, speedPerSecond)
         startScale = view.scale
         view.scale = startScale * minimumScale
