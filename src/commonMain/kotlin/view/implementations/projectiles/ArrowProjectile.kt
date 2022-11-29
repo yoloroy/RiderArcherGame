@@ -22,7 +22,7 @@ class ArrowProjectile(
 ) {
 
     companion object {
-        const val G = 9.81
+        const val G = 400.0 // todo refactor, move to place where arrow speed is stated
         const val minimumScale = 0.5
     }
 
@@ -42,7 +42,7 @@ class ArrowProjectile(
         view.scale = startScale * amplify(canopyShootingMath.projectionRatio)
     }
 
-    private fun amplify(sin: Double) = (sin + 0.3).pow(3).coerceAtLeast(minimumScale)
+    private fun amplify(ratio: Double) = (ratio * 2).coerceAtLeast(minimumScale)
 
     class Creator(
         private val container: Container,
@@ -70,23 +70,19 @@ class ArrowCanopyShootingMath private constructor(
             fullDistance: Double,
             horizontalSpeedPerSecond: Double
         ) = ArrowCanopyShootingMath(
-            gravityAccelerationPerSecond * fullDistance / horizontalSpeedPerSecond,
+            gravityAccelerationPerSecond * time(fullDistance, horizontalSpeedPerSecond).pow(2),
             gravityAccelerationPerSecond,
             horizontalSpeedPerSecond
         )
 
-        const val C = 100
+        private fun time(distance: Double, speedPerSecond: Double) = distance / speedPerSecond
     }
 
-    private var accumulatedAltitude = 0.0
+    val projectionRatio get() = sin(angleInRadians)
 
-    val projectionRatio get() = sin(angle)
-
-    // why there atan(y * C / x') instead of atan(y' * C / x')? - because that's how it works
-    private val angle get() = atan(accumulatedAltitude * C / horizontalSpeedPerSecond).radians
+    private val angleInRadians get() = atan(verticalSpeedPerSecond / horizontalSpeedPerSecond)
 
     fun update(dt: TimeSpan) {
-        accumulatedAltitude += verticalSpeedPerSecond * dt.seconds
         verticalSpeedPerSecond -= gravityAccelerationPerSecond * dt.seconds
     }
 }
