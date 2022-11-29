@@ -28,6 +28,7 @@ import view.graphics_components.*
 import view.implementations.enemies.*
 import view.implementations.player.*
 import view.implementations.projectiles.*
+import kotlin.collections.random
 import kotlin.random.*
 
 class GameScene(
@@ -47,6 +48,8 @@ class GameScene(
     private val arrowReachingFrameDuration = 0.2.seconds
     private lateinit var playerPosProvider: PosProvider
     private lateinit var arrowsCreator: Projectile.Creator
+
+    private var isChangingOfSceneStarted = false
 
     private val enemyFactoryCommonData = EnemyRiderArcherFactory.CommonData.Atomic
     private val enemyFactory: BaseUnit.Factory<BaseUnit> by lazy {
@@ -212,7 +215,10 @@ class GameScene(
             sceneView.enemyRiderArcher()
         }
         score += 1
-        if (units.size == 1) sceneContainer.launchReturnToMenu(score)
+        if (units.size == 1 && !isChangingOfSceneStarted) { // todo refactor, move to other place
+            isChangingOfSceneStarted = true
+            sceneContainer.launchReturnToMenu(score)
+        }
     }
 
     private fun Container.enemyRiderArcher(
