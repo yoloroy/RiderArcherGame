@@ -109,6 +109,7 @@ class GameScene(
             .Creator(this, Colors.BLACK, manager = projectileManager)
             .appendOnReach { destination ->
                 val reachingImg = image(arrowReachingBitmaps.first()) {
+                    anchor(0.5, 0.5)
                     position(destination)
                 }
                 launch {
