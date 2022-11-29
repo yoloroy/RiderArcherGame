@@ -19,7 +19,7 @@ abstract class WarriorGameObject(
     private var lastShotTime: TimeSpan = DateTime.now().time.encoded
 
     init {
-        projectileCreator.onReach(::onProjectileArrived)
+        projectileCreator.appendOnReach(::onProjectileArrived)
     }
 
     private val shooter: Shooter = Shooter.Base(PosProvider.ofViewCenter(view), projectileCreator)

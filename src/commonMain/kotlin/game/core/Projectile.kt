@@ -10,7 +10,7 @@ interface Projectile {
 
         protected var onReachCallbacks = listOf<(destination: IPoint) -> Unit>()
 
-        fun onReach(block: (destination: IPoint) -> Unit) = apply {
+        fun appendOnReach(block: (destination: IPoint) -> Unit) = apply {
             onReachCallbacks += block
         }
 
