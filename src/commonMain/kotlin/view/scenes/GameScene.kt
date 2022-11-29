@@ -17,6 +17,7 @@ import com.soywiz.korio.file.*
 import com.soywiz.korio.file.std.*
 import com.soywiz.korio.lang.*
 import com.soywiz.korma.geom.*
+import com.soywiz.korma.random.get
 import game.core.*
 import game.core.GameObjectManager.ManageableGameObject
 import game.units.*
@@ -211,7 +212,7 @@ class GameScene(
     override fun removeUnit(unit: HittableUnit) {
         attackManager.removeUnit(unit)
         sceneView.enemyRiderArcher()
-        if (Random.nextDouble(0.0, 1.0) > .85) { // 15% chance to spawn new enemy
+        if (Random[0.0, 1.0] > 0.85) { // 15% chance to spawn new enemy // todo refactor
             sceneView.enemyRiderArcher()
         }
         score += 1
