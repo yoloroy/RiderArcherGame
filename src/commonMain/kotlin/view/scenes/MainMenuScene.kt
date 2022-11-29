@@ -28,6 +28,8 @@ class MainMenuScene(private val sessionData: SessionData, private var score: Int
     }
 
     override suspend fun SContainer.sceneMain() {
+        solidRect(width, height, color = Colors.WHEAT)
+
         uiVerticalStack {
             val scoreRepresentation = score?.let { "\n  Score: $it" } ?: ""
             val maxScoreRepresentation = "\n  Max score: $maxScore"

@@ -67,6 +67,8 @@ class GameScene(
     private lateinit var arrowReachingBitmaps: List<Bitmap>
 
     override suspend fun SContainer.sceneInit() {
+        solidRect(width, height, color = Colors.WHEAT)
+
         controls = sessionData.loadControls()
 
         arrowReachingBitmaps = resourcesVfs["arrow_reach_frames"].listSimple()

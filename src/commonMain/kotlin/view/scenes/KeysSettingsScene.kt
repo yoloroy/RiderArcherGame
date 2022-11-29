@@ -33,6 +33,8 @@ class KeysSettingsScene(
     }
 
     override suspend fun SContainer.sceneMain() {
+        solidRect(width, height, color = Colors.SLATEGRAY + RGBA(0x33, 0x33, 0x33))
+
         var isKeyChangingStarted = false // TODO refactor
         var currentKeyIndex: Int = -1
 
