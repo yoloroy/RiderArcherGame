@@ -9,7 +9,7 @@ import game.core.gameobject.*
 import game.core.gameobject.EventsBasedGameObject.EventsProvider
 
 class BaseUnit(
-    private val view: View,
+    val view: View,
     hittableUnit: HittableUnit,
     controller: Controller,
     projectileCreator: Projectile.Creator,

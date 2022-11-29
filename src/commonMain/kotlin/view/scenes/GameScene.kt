@@ -42,7 +42,7 @@ class GameScene(
     AttackManager by attackManager,
     ReturnToMenu by returnToMenu {
 
-    private var gameObjects by KorAtomicRef(emptySet<GameObject>())
+    private var gameObjects by KorAtomicRef(emptySet<BaseUnit>())
     private var score = 0
     private val riderArcherSize = Size(25, 25)
     private val arrowReachSpriteSize = Size(20, 20)
@@ -104,9 +104,13 @@ class GameScene(
     }
 
 	override suspend fun SContainer.sceneMain() {
-        getOrCreateBox2dWorld().world.apply { // TODO
-            gravity = Vec2(0f, 0f)
-            customScale = 1.0
+        val worldComponent = getOrCreateBox2dWorld().apply {
+            positionIterations = 20
+            velocityIterations = 20
+            world.apply {
+                gravity = Vec2(0f, 0f)
+                customScale = 1.0
+            }
         }
 
         arrowsCreator = ArrowProjectile
@@ -137,7 +141,7 @@ class GameScene(
             playerHealthBar = healthBar(riderArcherSize.width, 4.0, Colors.BLACK, Colors.WHITE, Colors.RED, 1.0)
         }.registerBodyWithFixture(
             type = BodyType.DYNAMIC,
-            shape = CircleShape(8),
+            shape = CircleShape(riderArcherSize.p.length + 2),
             density = 1f
         )
         playerPosProvider = playerView.asPosProvider(Anchor.CENTER)
@@ -153,7 +157,7 @@ class GameScene(
                 10.0,
                 healthObserver = { _, _, new, max ->
                     playerHealthBar!!.update(new.toDouble() / max)
-                    if (new < 0) sceneContainer.launchReturnToMenu(score)
+                    onPlayerDamaged(new)
                 }
             ),
             PlayerRiderArcherController(
@@ -178,14 +182,57 @@ class GameScene(
         }
 
         start(this)
+        borders(worldComponent.world)
 	}
 
-    private fun <T> remove(gameObject: T) where T : ManageableGameObject, T : HittableUnit {
+    private fun onPlayerDamaged(newHealth: Int) {
+        if (newHealth < 0 && !isChangingOfSceneStarted) {
+            isChangingOfSceneStarted = true
+            sceneContainer.launchReturnToMenu(score)
+        }
+    }
+
+    private fun Container.borders(world: World) {
+        // top
+        solidRect(width, 100.0) {
+            anchor(0, 1)
+            position(0, 0)
+            onCollision { view ->
+                gameObjects.find { it.view == view }?.view?.apply { y += height }
+            }
+        }
+        // bottom
+        solidRect(width, 100.0) {
+            anchor(0, 0)
+            position(0.0, this@borders.height)
+            onCollision { view ->
+                gameObjects.find { it.view == view }?.view?.apply { y -= height }
+            }
+        }
+        // left
+        solidRect(100.0, width) {
+            anchor(1, 0)
+            position(0, 0)
+            onCollision { view ->
+                gameObjects.find { it.view == view }?.view?.apply { x += width }
+            }
+        }
+        // right
+        solidRect(100.0, width) {
+            anchor(0, 0)
+            position(this@borders.width, 0.0)
+            onCollision { view ->
+                gameObjects.find { it.view == view }?.view?.apply { x -= width }
+            }
+        }
+    }
+
+    private fun remove(gameObject: BaseUnit) {
         removeGameObject(gameObject)
         removeUnit(gameObject)
     }
 
-    private fun <T> add(gameObject: T) where T : ManageableGameObject, T : HittableUnit {
+    private fun add(gameObject: BaseUnit) {
         onStart(gameObject)
         addUnit(gameObject)
     }
@@ -203,10 +250,10 @@ class GameScene(
         ))
     }
 
-    override fun onStart(gameObject: ManageableGameObject) { gameObjects += gameObject }
+    override fun onStart(gameObject: ManageableGameObject) { gameObjects += gameObject as BaseUnit }
 
     override fun removeGameObject(gameObject: ManageableGameObject) {
-        gameObjects -= gameObject.also { it.remove() }
+        gameObjects -= gameObject.also { it.remove() } as BaseUnit
     }
 
     override fun removeUnit(unit: HittableUnit) {
@@ -216,10 +263,7 @@ class GameScene(
             sceneView.enemyRiderArcher()
         }
         score += 1
-        if (units.size == 1 && !isChangingOfSceneStarted) { // todo refactor, move to other place
-            isChangingOfSceneStarted = true
-            sceneContainer.launchReturnToMenu(score)
-        }
+        if (units.size == 1) sceneContainer.launchReturnToMenu(score)
     }
 
     private fun Container.enemyRiderArcher(
@@ -236,7 +280,7 @@ class GameScene(
             position(pos.x, pos.y)
         }.registerBodyWithFixture(
             type = BodyType.DYNAMIC,
-            shape = CircleShape(riderArcherSize.p.length + 2),
+            shape = CircleShape(riderArcherSize.p.length * 0.4),
             density = 1f
         )
     }
