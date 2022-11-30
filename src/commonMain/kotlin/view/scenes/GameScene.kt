@@ -44,6 +44,7 @@ class GameScene(
 
     private var gameObjects by KorAtomicRef(emptySet<BaseUnit>())
     private var score = 0
+    private val wolfSize = Size(15, 15)
     private val riderArcherSize = Size(25, 25)
     private val arrowReachSpriteSize = Size(20, 20)
     private val arrowReachingFrameDuration = 0.2.seconds
@@ -66,6 +67,7 @@ class GameScene(
 
     private lateinit var controls: Controls
 
+    private lateinit var wolfBitmap: Bitmap
     private lateinit var riderArcherBitmap: Bitmap
     private lateinit var enemyRiderArchersBitmaps: List<Bitmap>
     private lateinit var arrowReachingBitmaps: List<Bitmap>
@@ -101,6 +103,9 @@ class GameScene(
                     }
                 }
             }
+
+        wolfBitmap = resourcesVfs["wolf.png"].readBitmap()
+            .resized(wolfSize.width.toInt(), wolfSize.height.toInt(), ScaleMode.FILL, Anchor.TOP_LEFT)
     }
 
 	override suspend fun SContainer.sceneMain() {
@@ -180,6 +185,14 @@ class GameScene(
         repeat(2) {
             enemyRiderArcher()
         }
+/*
+        repeat(6) { // TODO refactor
+            wolf(
+                image(wolfBitmap),
+                playerPosProvider,
+                10 // TODO
+            )
+        }*/
 
         start(this)
         borders(worldComponent.world)
